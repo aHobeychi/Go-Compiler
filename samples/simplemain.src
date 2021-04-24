@@ -1,0 +1,17 @@
+main  
+{
+  var
+  {
+   integer x;
+   integer y;
+  }
+
+  x  = 21 * 32 - 2 - (123 - 321 | 32); 
+  write(x);
+
+  y = ?[10 >= 1 : x / 23 : x - 23];
+  write(y);
+
+  read(x);
+  write(x);
+}

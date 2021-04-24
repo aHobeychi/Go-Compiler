@@ -1,0 +1,721 @@
+
+\documentstyle[11pt]{article}
+\newcounter{enumval}
+
+\textwidth     6.5in
+\textheight      9in
+\topmargin    -0.5in
+\oddsidemargin   0in
+\evensidemargin  0in
+\parskip         5pt plus 3pt minus 1pt
+\parindent       0pt
+
+\newcommand{\luna}{{\sf LUNA}}
+\newcommand{\moon}{{\sf MOON}}
+\newcommand{\sun }{{\sf SUN }}
+
+\newcommand{\xf}[1]{Figure~\ref{#1}}
+\newcommand{\xs}[1]{Section~\ref{#1}}
+\newcommand{\id}[1]{\mbox{\it #1\/}}
+\newcommand{\kw}[1]{\mbox{\sf #1}}
+\newcommand{\qt}[1]{``{\tt #1}''}
+\newcommand{\cmt}{{\rm \%}}
+\newcommand{\usc}{\underline{\hskip 1em}}
+\newcommand{\bt}{$\bullet$}
+\newcommand{\lr}{\mbox{$\longrightarrow$}}
+\newcommand{\code}[1]{\langle#1\rangle}
+
+%\newcommand{\cmem}[1]{{\cal M}(#1)}
+%\newcommand{\creg}[1]{{\cal R}(#1)}
+
+\setcounter{secnumdepth}{3}
+
+\newenvironment{prog}{\par\def\-{\qquad}\vspace{\parskip}%
+\parskip0pt\leftskip2em\obeylines}{}
+
+\newcommand{\bmem}[1]{{\cal M}_8[#1]}
+\newcommand{\wmem}[1]{{\cal M}_{32}[#1]}
+\newcommand{\breg}[2]{{\cal R}_{#1}(#2)}
+\newcommand{\wreg}[1]{{\cal R}(#1)}
+\newcommand{\ic}{\mbox{\it PC\/}}
+\newcommand{\ass}[1]{\stackrel{#1}{\longleftarrow}}
+\newcommand{\nont}[1]{\mbox{\sl #1\/}}
+\newcommand{\ang}[1]{\langle\mbox{\it #1\/}\rangle}
+
+\newenvironment{nolab}%
+{\begin{list}{}{\topsep 0pt plus 3pt \labelsep 0.5em%
+\leftmargin 2em \parsep0.5ex \itemsep 0ex}}%
+{\end{list}}
+
+\author{Peter Grogono \\ \\
+Department of Computer Science\\
+Concordia University}
+\title{The \moon\ Processor}
+\date{1995}
+\pagestyle{headings}
+\begin{document}
+\maketitle
+% Heading: change to your requirements
+
+%\begin{center}
+%{\Large COMP 442/642 Compiler Design}\\[1pc]
+%{\large Winter 1995}\\[3pc]
+%\end{center}
+
+\section{The \moon\ Processor}
+
+The \moon\ is an imaginary processor based on recent RISC
+architectures.\footnote{A \moon\ is similar to a \sun, but not as
+bright.} The architecture is similar to, but simpler than, the DLX
+architecture described by John Hennessy and David Patterson in their
+textbook.\footnote{{\it Computer Architecture: a Quantitative
+Approach\/}, John Hennessy and David Patterson, Morgan Kaufmann, 1990.}
+This document describes the architecture, instruction set, and assembly
+language of the \moon\ processor.
+
+\subsection{Architecture}
+
+The \moon\ is a RISC (Reduced Instruction Set Computer). The number of
+different instructions is small, and individual instructions are simple.
+All instructions occupy one word and require one memory cycle to execute
+(additional time may be required for data access).
+
+\subsubsection{Processor}
+
+The processor has a few instructions that access memory and many
+instructions that perform operations on the contents of registers. Since
+register access is much faster than memory access, it is important to
+make good use of registers to use the \moon\ efficiently.
+
+There are sixteen registers, $R0,R1,\ldots,R15$. $R0$ always contains
+zero. There is a 32-bit {\it program counter\/} that contains the
+address of the next instruction to be executed.
+
+\subsubsection{Memory}
+
+A memory address is a value in the range $0,1,\ldots,2^{31}$. The amount
+of memory actually available is typically less than this.
+
+Each address identifies one 8-bit byte. The addresses $0,4,\ldots,4N$
+are {\it word addresses\/}. The processor can load and store bytes and
+words.
+
+\subsection{Terminology and Notation}
+
+A {\bf word} has 32 bits. The bits are numbered from 0 (the most
+significant) to 31 (the least significant).
+
+An {\bf integer} is a 32-bit quantity that can be stored in a word.
+An integer value $N$ satisfies the inequality $2^{-31} \le N < 2^{31}$.
+Bit~0 is the {\bf sign bit}. Integers are stored in two's-complement
+form.
+
+An {\bf address} has 32 bits. Address calculations may involve signed
+numbers, but the result is interpreted as an unsigned, 32-bit quantity.
+
+A {\bf byte} has 8 bits. The bits are numbered from 0 (the most
+significant) to 7 (the least significant). Up to four bytes may be stored
+in a word.
+
+The name of the memory is ${\cal M}$. The expression $\bmem{K}$ denotes
+the byte stored at address $K$. The expression $\wmem{K}$ denotes the
+word stored at addresses $K,K+1,K+2$, and $K+3$.
+
+An address is {\bf legal} if the addressed byte exists. Legal addresses
+form a contiguous sequence $0,1,\ldots,N$, where $N$ depends on the
+processor or simulator.
+
+An address is {\bf aligned} if it is a multiple of 4. The aligned
+addresses are therefore $0,4,8,\ldots,4N$.
+
+The names $R0,R1,\ldots,R15$ denote {\bf registers}. Each register can
+store a 32-bit word. We write $\wreg{i}$ to denote the contents of
+register $Ri$ and $\breg{a..b}{i}$ to denote the contents of bits
+$a,a+1,\ldots,b$ of register $Ri$. At all times, $\wreg{0}=0$.
+
+The name \ic\ denotes the {\bf program counter}. The program counter
+stores the 32-bit address of the current instruction.
+
+The symbol $\longleftarrow$ stands for data transfer, or assignment. A
+numeric superscript indicates the number of bits transferred. For
+example, $ \breg{24..31}{3} \ass{8} \bmem{1000} $ means that 8 bits (one
+byte) is transferred from memory location $1000$ to the least
+significant byte of $R3$.
+
+\subsection{Instruction Set}
+
+\subsubsection{Instruction Formats}
+
+Each instruction occupies one word (32 bits) of memory. There are two
+instruction formats, A and B, shown in \xf{fmts}. Both formats contain a
+6-bit operation code. Format~A contains three register operands and
+Format~B contains two register operands and a 16-bit data operand.
+Formats are not mentioned further in this document because they are not
+relevant to assembly language programming. In general, however, an
+instruction is Format~B if and only if it contains a $K$ operand.
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{picture}(380,80)
+\thicklines
+
+\put( 60,60){\line(1,0){320}}
+\put( 60,40){\line(1,0){320}}
+\put( 60,40){\line(0,1){20}}
+\put(120,40){\line(0,1){20}}
+\put(160,40){\line(0,1){20}}
+\put(200,40){\line(0,1){20}}
+\put(240,40){\line(0,1){20}}
+\put(380,40){\line(0,1){20}}
+\put( 60,65){\makebox(0,0)[l]{\scriptsize  0}}
+\put(120,65){\makebox(0,0)[l]{\scriptsize  6}}
+\put(160,65){\makebox(0,0)[l]{\scriptsize 10}}
+\put(200,65){\makebox(0,0)[l]{\scriptsize 14}}
+\put(240,65){\makebox(0,0)[l]{\scriptsize 18}}
+\put(380,65){\makebox(0,0)[l]{\scriptsize 32}}
+\put( 30,50){\makebox(0,0){Format A}}
+\put( 90,50){\makebox(0,0){opcode}}
+\put(140,50){\makebox(0,0){$Ri$}}
+\put(180,50){\makebox(0,0){$Rj$}}
+\put(220,50){\makebox(0,0){$Rk$}}
+
+\put( 60,20){\line(1,0){320}}
+\put( 60, 0){\line(1,0){320}}
+\put( 60, 0){\line(0,1){20}}
+\put(120, 0){\line(0,1){20}}
+\put(160, 0){\line(0,1){20}}
+\put(200, 0){\line(0,1){20}}
+\put(220, 0){\line(0,1){20}}
+\put(380, 0){\line(0,1){20}}
+\put( 60,25){\makebox(0,0)[l]{\scriptsize  0}}
+\put(120,25){\makebox(0,0)[l]{\scriptsize  6}}
+\put(160,25){\makebox(0,0)[l]{\scriptsize 10}}
+\put(200,25){\makebox(0,0)[l]{\scriptsize 14}}
+\put(220,25){\makebox(0,0)[l]{\scriptsize 16}}
+\put(380,25){\makebox(0,0)[l]{\scriptsize 32}}
+\put( 30,10){\makebox(0,0){Format B}}
+\put( 90,10){\makebox(0,0){opcode}}
+\put(140,10){\makebox(0,0){$Ri$}}
+\put(180,10){\makebox(0,0){$Rj$}}
+\put(300,10){\makebox(0,0){$K$}}
+
+\end{picture}
+\end{center}
+\caption{Instruction Formats}
+\label{fmts}
+\end{figure}
+
+Instructions are divided into three classes: data access, arithmetic,
+and control. The following subsections describe the effects of each
+instruction. Unless otherwise stated, \ic\ is incremented by 4 during
+the execution of an instruction. That is, the operation
+$\ic\ass{32}\ic+4$ is performed implicitly.
+
+\subsubsection{Data Access Instructions}
+
+See \xf{datac}. The effective address produced by the operand $K(Rj)$ is
+$\wreg{j}+K$. The effective address must be legal; otherwise the
+processor halts with an error condition. The data field $K$ is
+interpreted as a signed, 16-bit quantity: $-16384\le K<16384$.
+
+The effective address of a load word (\kw{lw}) or store word (\kw{sw})
+instruction must be aligned; otherwise the processor halts with an error
+condition.
+
+A \kw{lb} instruction affects only the 8 low-order bits of the register;
+the 24 high-order bits are unaffected.
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{tabular}{|l|ll|l|c|} \hline
+Function   & \multicolumn{2}{c|}{Operation}           & \multicolumn{1}{c|}{Effect} \\ \hline\hline
+Load word  & \kw{lw}  & $Ri,K(Rj)$ & $ \wreg{i} \ass{32} \wmem{\wreg{j}+K} $        \\
+Load byte  & \kw{lb}  & $Ri,K(Rj)$ & $ \breg{24..31}{i} \ass{8} \bmem{\wreg{j}+K} $ \\
+Store word & \kw{sw}  & $K(Rj),Ri$ & $ \wmem{\wreg{j}+K} \ass{32} \wreg{i} $        \\
+Store byte & \kw{sb}  & $K(Rj),Ri$ & $ \bmem{\wreg{j}+K} \ass{8} \breg{24..31}{i} $ \\ \hline
+\end{tabular}
+\end{center}
+\caption{Data Access Instructions}
+\label{datac}
+\end{figure}
+
+\subsubsection{Arithmetic Instructions}
+
+Most of the arithmetic instructions have three operands. The first two
+operands are registers and the third is either a register (\xf{reg}) or
+an immediate operand (\xf{imm}) whose value is stored in the
+instruction. The first operand receives the result of the operation; the
+other operands are not affected by the operation.
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{tabular}{|l|ll|l|c|} \hline
+Function         & \multicolumn{2}{c|}{Operation}            & \multicolumn{1}{c|}{Effect} \\ \hline\hline
+Add              & \kw{add} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} +      \wreg{k} $ \\
+Subtract         & \kw{sub} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} -      \wreg{k} $ \\
+Multiply         & \kw{mul} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \times \wreg{k} $ \\
+Divide           & \kw{div} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \div   \wreg{k} $ \\
+Modulus          & \kw{mod} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \bmod  \wreg{k} $ \\
+And              & \kw{and} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \land  \wreg{k} $ \\
+Or               & \kw{or } & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \lor   \wreg{k} $ \\
+Not              & \kw{not} & $Ri, Rj$   & $\wreg{i} \ass{32} \lnot\wreg{j}            $ \\
+Equal            & \kw{ceq} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} =      \wreg{k} $ \\
+Not equal        & \kw{cne} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \ne    \wreg{k} $ \\
+Less             & \kw{clt} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} <      \wreg{k} $ \\
+Less or equal    & \kw{cle} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \le    \wreg{k} $ \\
+Greater          & \kw{cgt} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} >      \wreg{k} $ \\
+Greater or equal & \kw{cge} & $Ri,Rj,Rk$ & $\wreg{i} \ass{32} \wreg{j} \ge    \wreg{k} $ \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Arithmetic Instructions with Register Operands}
+\label{reg}
+\end{figure}
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{tabular}{|l|ll|l|c|} \hline
+Function         & \multicolumn{2}{c|}{Operation}            & \multicolumn{1}{c|}{Effect} \\ \hline\hline
+Add immediate              & \kw{addi} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} +      K $ \\
+Subtract immediate         & \kw{subi} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} -      K $ \\
+Multiply immediate         & \kw{muli} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \times K $ \\
+Divide immediate           & \kw{divi} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \div   K $ \\
+Modulus immediate          & \kw{modi} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \bmod  K $ \\
+And immediate              & \kw{andi} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \land  K $ \\
+Or immediate               & \kw{ori} &  $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \lor   K $ \\
+Equal immediate            & \kw{ceqi} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} =      K $ \\
+Not equal immediate        & \kw{cnei} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \ne    K $ \\
+Less immediate             & \kw{clti} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} <      K $ \\
+Less or equal immediate    & \kw{clei} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \le    K $ \\
+Greater immediate          & \kw{cgti} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} >      K $ \\
+Greater or equal immediate & \kw{cgei} & $Ri,Rj,K$ & $\wreg{i} \ass{32} \wreg{j} \ge    K $ \\
+Shift left  & \kw{sl} & $Ri,K$ & $\wreg{i} \ass{32} \wreg{i} \ll K$ \\
+Shift right & \kw{sr} & $Ri,K$ & $\wreg{i} \ass{32} \wreg{i} \gg K$ \\ \hline
+\end{tabular}
+\end{center}
+\caption{Arithmetic Instructions with an Immediate Operand}
+\label{imm}
+\end{figure}
+
+The operands need not be distinct. For example, the instruction
+\kw{sub}~$R2,R2,R2$ could be used to set register 2 to zero.
+
+The \moon\ processor does not detect carry or overflow in arithmetic
+instructions.
+
+The ``logical'' operations, \kw{and}, \kw{or}, and \kw{not}, operate on
+each bit of the word, with the usual interpretations.
+
+The comparison instructions (\kw{c\_\_\_}) are similar to the other binary
+operators except that the value they store in the result register is
+either 1 (if the comparison yields true), or 0 (if the comparison yields
+false).
+
+In instructions with immediate operands (\kw{\_\_\_i}), the operand $K$
+is a signed, 16-bit quantity. Negative numbers are sign-extended. For
+example, the operand $-1$ is interpreted as $-1_{0..31}$, not as 65535
+(its 16-bit value).
+
+The shift instructions (\kw{s\_}) are useful if $0\le K\le 31$; their
+effect is undefined otherwise. The operators $\ll$ and $\gg$ have the
+same effect as \verb"<<" and \verb">>" in C.
+
+\subsubsection{Input and Output Instructions}
+
+See \xf{io}. The instruction \kw{getc} reads one byte from \id{stdin},
+the standard input stream. Similarly, \kw{putc} writes to \id{stdout},
+the standard output stream.
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{tabular}{|l|ll|l|c|} \hline
+Function                 & \multicolumn{2}{c|}{Operation}         & \multicolumn{1}{c|}{Effect} \\ \hline\hline
+Get character & \kw{getc} & $Ri$ & $\breg{24..31}{i} \ass{8} \mbox{Stdin}  $ \\
+Put character & \kw{putc} & $Ri$ & $\mbox{Stdout} \ass{8} \breg{24..31}{i} $ \\ \hline
+\end{tabular}
+\end{center}
+\caption{Input and Output Instructions}
+\label{io}
+\end{figure}
+
+\subsubsection{Control Instructions}
+
+See \xf{cins}. The target of a branch instruction (that is, the value
+assigned to \ic\ if the branch is taken) must be a legal address;
+otherwise the processor halts with an error condition.
+
+The jump-and-link instructions are used to call subroutines; they store
+the return address in the specified register and then jump to the given
+location.
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{tabular}{|l|ll|l|c|} \hline
+Function                 & \multicolumn{2}{c|}{Operation}         & \multicolumn{1}{c|}{Effect} \\ \hline\hline
+Branch if zero           & \kw{bz}  & $Ri,K$  & if $\wreg{i}=0$ then $\ic\ass{16}\ic+K$       \\
+Branch if non-zero       & \kw{bnz} & $Ri,K$  & if $\wreg{i}\ne 0$ then $\ic\ass{16}\ic+K$    \\
+Jump                     & \kw{j}   & $K$     & $\ic\ass{16}\ic+K$                            \\
+Jump (register)          & \kw{jr}  & $Ri$    & $\ic\ass{32}\wreg{i}$                         \\
+Jump and link            & \kw{jl}  & $Ri,K$  & $\wreg{i}\ass{32}\ic+4; \ic\ass{16}\ic+K $    \\
+Jump and link (register) & \kw{jlr} & $Ri,Rj$ & $\wreg{i}\ass{32}\ic+4; \ic\ass{16}\wreg{j} $ \\
+No-op                    & \kw{nop} &         & Do nothing                                    \\
+Halt                     & \kw{hlt} &         & Halt the processor                            \\ \hline
+\end{tabular}
+\end{center}
+\caption{Control Instructions}
+\label{cins}
+\end{figure}
+
+\subsection{Timing}
+
+The time required to run a program is measured in clock cycles and
+dominated by memory access. There are two paths to the memory; one is
+used to read instructions and the other is used to read and write data.
+
+Before each instruction is executed, the processor must load a 32-bit
+word containing the instruction. This requires 10 clock cycles.
+
+For data, the processor uses a {\it memory address register\/} (MAR) and
+a 32-bit {\it memory data register\/} (MDR). The processor loads an
+address into MAR and issues a read or write directive to the memory
+controller. The memory controller either obtains a word of data from the
+memory and stores it in MDR (read) or copies the contents of MDR to the
+memory.
+
+A read or write operation requires 10 clock cycles. If the data required
+for a read operation is already in the MDR, the read operation requires
+only 1 clock cycle. For example, loading the four bytes of a word using
+\kw{lb} instructions requires 10 clock cycles for the first byte and
+1~clock cycle for each of the other three bytes, provided that no other
+data access intervenes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{\moon\ Assembly Language} \label{sec:asslan}
+
+Programs for the \moon\ processor are written in its {\it assembly
+language\/}. We use the following typographical conventions to describe
+the grammar of the assembly language. \xf{gram} shows the grammar.
+
+\begin{itemize}
+
+\item Non-terminal symbols are written in \nont{slanted type} and have
+      an initial upper case letter.
+      \linebreak Examples: \nont{Program}, \nont{Instr}.
+
+\item Terminal symbols are written in a \kw{sans serif} font.
+      Punctuation symbols are quoted.
+      \linebreak Examples: \kw{eol}, ``\verb","''.
+
+\item The following symbols are metasymbols of the grammar:
+
+      \begin{tabular}{cl}
+      $\longrightarrow$  & separates the defined symbol from the
+                           defining expression; \\
+      $|$                & indicates alternatives; \\
+      $[ \,\ldots\, ]$   & enclose an optional item (zero or one
+                           occurrences); \\
+      $\{ \,\ldots\, \}$ & enclose a repeated item (zero or more
+                           occurrences). \\
+      \end{tabular}
+
+\end{itemize}
+
+\begin{figure}[tbhp]
+\begin{center}
+\begin{tabular}{|rcl|} \hline
+\nont{Program}  & $\longrightarrow$ & \{ \nont{Line} \} \kw{eof} \\
+\nont{Line}     & $\longrightarrow$ & [ \nont{Symbol} ] [ \nont{Instr} $|$ \nont{Directive} ] [ \nont{Comment} ] \kw{eol} \\
+\nont{Directive}& $\longrightarrow$ & \nont{DirCode} [ \nont{Operand} \{ ``\verb","'' \nont{Operand} \} ] \\
+\nont{Instr}    & $\longrightarrow$ & \nont{Opcode} [ \nont{Operand} \{ ``\verb","'' \nont{Operand} \} ] \\
+\nont{Operand}  & $\longrightarrow$ & \nont{Register} $|$ \nont{Constant} [ ``\verb"("'' \nont{Register} ``\verb")"'' ] $|$ \nont{String} \\
+\nont{Register} & $\longrightarrow$ & ( ``\verb"r"'' $|$ ``\verb"R"'' ) \nont{Digit} [ \nont{Digit} ] \\
+\nont{Constant} & $\longrightarrow$ & \nont{Number} $|$ \nont{Symbol} \\
+\nont{Number}   & $\longrightarrow$ & [ ``\verb"+"'' $|$ ``\verb"-"'' ] \nont{Digit} \{ \nont{Digit} \} \\
+\nont{String}   & $\longrightarrow$ & ``\verb+"+'' \{ \nont{Char} \} ``\verb+"+'' \\
+\nont{Symbol}   & $\longrightarrow$ & \nont{Letter} \{ \nont{Letter} $|$ \nont{Digit} \} \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Assembly Language Grammar}
+\label{gram}
+\end{figure}
+
+The symbols \kw{eof} and \kw{eol} denote ``end of file'' and ``end of
+line'', respectively.
+
+A \nont{Symbol} is a string consisting of the following characters:
+letters, digits, and \underline{\hskip 0.7em}. The first character of a
+symbol must not be a digit. Directives and instruction codes must not be
+used as symbols. Strings of the form ``\verb"R"$\,\{\,\id{Digit}\,\}$''
+and ``\verb"r"$\,\{\,\id{Digit}\,\}$'' are not legal symbols
+(cf.~register syntax below).
+
+A \nont{Comment} starts with the character ``\cmt'' and continues to the
+end of the current line.
+
+A \nont{Constant} is a signed, decimal number.
+
+The registers are ``\verb"R0"'' through ``\verb"R15"''. The letter ``R''
+may be either upper or lower case.
+
+The predefined symbol \id{topaddr} has $M+1$ as its value, where $M$ is
+the highest legal address. This symbol can be used to check for
+addressing errors or to initialize a stack or frame pointer. For
+example, the following instruction could be used to initialize the frame
+pointer:
+
+\begin{prog}
+\tt\-\-addi\-r14,r0,topaddr
+\end{prog}
+
+The syntax of \nont{Directive} depends on the particular directive, as
+shown in \xf{dir}.
+
+\begin{figure}[hbtp]
+\begin{center}
+\begin{tabular}{|ll|l|} \hline
+\multicolumn{2}{|c|}{Directive} & \multicolumn{1}{|c|}{Effect} \\ \hline\hline
+\kw{entry} &                  & The following instruction will be the first to execute \\
+\kw{align} &                  & The next address will be aligned \\
+\kw{org}   & $K$              & The next address will be $K$ \\
+\kw{dw}    & $K_1,K_2,\ldots$ & Store words in memory \\
+\kw{db}    & $K_1,K_2,\ldots$ & Store bytes in memory \\
+\kw{res}   & $K$              & Reserve $K$ bytes of memory \\ \hline
+\end{tabular}
+\end{center}
+\caption{Directives}
+\label{dir}
+\end{figure}
+
+The operands of a \kw{dw} directive are either symbols or integers.
+
+The operands of a \kw{db} directive are bytes (unsigned numbers in the
+range $0,1,\ldots,255$) or strings enclosed in quotes ({\tt "~...~"}).
+The characters in the string must be ASCII graphic characters (codes 32
+through 126) only. The \moon\ simulator does not recognize escape
+characters in strings.
+
+The operand of a \kw{res} directive is a positive integer, $K$. The
+assembler requires $K<2^{31}$, but in practice the maximum value of $K$
+will be limited by the amount of memory available.
+
+\xf{prog} shows a listing that might be generated by the assembler for a
+simple program. The addresses in the left column would not be included
+in the input file generated by a programmer or compiler.
+
+\begin{figure}[hbtp]
+\begin{verbatim}
+          1     0         org   103
+          2   103 message db    "Hello, world!", 13, 10, 0
+          3   119         org   217
+          4   217         align
+          5   220         entry                  % Start here
+          6   220         add   r2,r0,r0
+          7   224 pri     lb    r3,message(r2)   % Get next char
+          8   228         ceqi  r4,r3,0
+          9   232         bnz    r4,pr2          % Finished if zero
+         10   236         putc   r3
+         11   240         addi   r2,r2,1
+         12   244         j      pri             % Go for next char
+         13   248 pr2     addi   r2,r0,name      % Go and get reply
+         14   252         jl     r15,getname
+         15   256         hlt                    % All done!
+         16   260
+         17   260 % Subroutine to read a string
+         18   260 name    res    59              % Name buffer
+         19   319         align
+         20   320 getname getc   r3              % Read from keyboard
+         21   324         ceqi   r4,r3,10
+         22   328         bnz    r4,endget       % Finished if CR
+         23   332         sb     0(r2),r3        % Store char in buffer
+         24   336         addi   r2,r2,1
+         25   340         j      getname
+         26   344 endget  sb     0(r2),r0        % Store terminator
+         27   348         jr     r15             % Return
+         28   352
+         29   352 data    dw     1000, -35
+         30   360         dw     99, getname
+\end{verbatim}
+\caption{An Assembly Language Program}
+\label{prog}
+\end{figure}
+
+The program begins with a directive, \kw{org}, specifying that the data
+labelled ``{\tt message}'' will be stored at address 103. Since the
+message is a byte string, it is in fact stored at that address, without
+alignment.
+
+The processor and assembly language do not require any particular format
+for strings. The convention used in this program is that strings are
+null-terminated, as in C. An alternative would be to prefix a string
+with a number giving its length, as Pascal does. The bytes 13 and 10 are
+{\sc return} and {\sc linefeed}, respectively.
+
+The directive \kw{org~217} sets the current address to 217. The
+\kw{align} directive changes the current address to the next word
+boundary, 220. The directive \kw{entry} immediately before this
+instruction indicates that it is the first instruction to be executed.
+
+The directive \kw{res~59} at address 260 reserves 59~bytes of memory.
+The following directive, \kw{align}, ensures that the next instruction
+will be aligned on a word boundary.
+
+\section{The \moon\ Simulator}
+
+The assembler/simulator is a program that assembles a \moon\ program and
+simulates its execution. It is implemented as a C program (\kw{moon.c}), 
+which can be compiled using any standard C compiler, such as \kw{gcc}. 
+In this documentation, it is assumed that the name of the program is \kw{moon}. 
+In more detail, \kw{moon} performs the following actions.
+
+\begin{itemize}
+
+\item Read the assembly language files indicated on the command line and
+      store them in the simulated memory. There will typically be two
+      files, a program with subroutines and a subroutine library. The
+      loader checks for syntax errors; if any are found, \kw{moon}
+      reports the errors and returns without further processing.
+
+\item By default, start executing the program at the entry point and
+      continue simulating until a \kw{hlt} instruction has been
+      executed. If the user selects the trace option, the simulator
+      enters trace mode.
+
+\end{itemize}
+
+The simulator is invoked by a command of the form
+
+\begin{prog}
+\kw{moon} $a_1,\ldots,a_n$
+\end{prog}
+
+in which $a_1,a_2,\ldots$ are command-line arguments. The arguments may
+appear in any order; \xf{args} describes the permitted values and effect
+of each argument. The default values of arguments are indicated by
+bullets between the argument and its description.
+
+The \kw{p} directive may be used to generate listings of selected files.
+For example, the command
+
+\begin{prog}
+\kw{moon} $+\kw{p}$ \kw{main} $-\kw{p}$ \kw{lib}
+\end{prog}
+
+would generate a listing of \kw{main} but not of \kw{lib}. The listing
+will be written to \verb"moon.prn" unless a file name is provided with a
+$+\kw{o}$ argument. There must not be any blanks between the \kw{o}
+directive and the file name.
+
+\begin{figure}[hbtp]
+\begin{tabular}{lcp{5in}}
+$\ang{filename}$        && Read assembly language from the file
+                           $\ang{filename}$, assemble it, and store
+                           it in memory. If the filename has no
+                           extension, \moon\ adds \kw{.m}. \\
+$+\kw{p}$               && Generate a listing. \\
+$-\kw{p}$               &$\bullet$
+                         & Do not generate a listing. \\
+$+\kw{s}$               && Display values of symbols. \\
+$-\kw{s}$               &$\bullet$
+                         & Do not display values of symbols. \\
+$-\kw{t}$               &$\bullet$
+                         & Execute the program in normal mode. \\
+$+\kw{t}$               && Execute the program in trace mode. \\
+$-\kw{x}$               && Do not execute the program. \\
+$+\kw{x}$               &$\bullet$
+                         & Execute the program. \\
+$+\kw{o}\ang{filename}$ && Write listings to $\ang{filename}\kw{.prn}$. \\
+\end{tabular}
+\caption{Command-line Arguments}
+\label{args}
+\end{figure}
+
+If \kw{moon} is started in trace mode, it responds interactively to the
+commands described in \xf{trac}. Command letters may be entered in upper
+or lower case. The operand of a trace command, shown as $\ang{m}$, may
+be given as a number or a symbol. For example, if we were tracing the
+program of \xf{prog}, either of the commands
+
+\begin{prog}
+\kw{b}320
+\kw{b}getname
+\end{prog}
+
+would set a breakpoint at address 320. The case of letters in symbol
+names is significant.
+
+\begin{figure}[hbtp]
+\begin{tabular}{lp{5in}}
+{\sc return}           & Execute $k$ instructions, where $k$ is 10 by
+                         default but can be changed by the \kw{k} command. \\
+$\kw{b}$               & Show all breakpoints. \\
+$\kw{b}\ang{m}$        & Set a breakpoint at memory location $m$. \\
+$\kw{c}$               & Clear all breakpoints. \\
+$\kw{c}\ang{m}$        & Clear the breakpoint at memory location $m$. \\
+$\kw{d}$               & Dump memory locations $\ic\pm20$. \\
+$\kw{d}\ang{m}$        & Dump memory locations $m\pm20$. \\
+$\kw{i}$               & Set \ic\ to entry point. \\
+$\kw{i}\ang{m}$        & Set \ic\ to $m$. \\
+$\kw{h}$               & Display a help screen. \\
+$\kw{k}$               & Set $k$ to its default value of 10. \\
+$\kw{k}\ang{m}$        & Set $k$ to $m$. \\
+$\kw{q}$               & Quit the simulator. \\
+$\kw{r}$               & Display register values. \\
+$\kw{s}$               & Display symbol values. \\
+$\kw{x}$               & Run until next breakpoint. \\
+$\kw{x}\ang{m}$        & Run until $\ic=m$. \\
+\end{tabular}
+\caption{Interactive Commands for Trace Mode}
+\label{trac}
+\end{figure}
+
+In trace mode, \kw{moon} initializes the value of \ic\ to the entry point
+and maintains it in accordance with instructions executed thereafter. As
+each instruction is executed, the interpreter displays the instruction
+and the values of changed registers or memory locations. The command
+\kw{i} sets the value of \ic\ to the given value, or to the entry point
+if no value is given.
+
+The command \kw{d} displays values of memory words and the command
+\kw{r} displays values of registers. Each value is displayed as a
+hexadecimal number, as a string of four characters, and as a 32-bit
+signed integer. In the character display, non-graphic characters are
+shown as dots.
+
+\subsection{Programming Conventions}
+
+The \moon\ architecture does not restrict programmers to any particular
+pattern of use. The addressing mode $K(Ri)$ is suitable for addressing a
+stack, with $Ri$ as the stack pointer and $K$ as an offset computed by
+the compiler. Any register can be used as the link for subroutine calls.
+Arguments can be passed either in registers or on the stack.
+
+\subsection{Defects of the Simulator}
+
+The precise behaviour of the \moon\ simulator depends on the
+architecture of the processor on which it is running and also on the C
+compiler used to compile it.
+
+\begin{itemize}
+
+\item The order in which bytes are stored in a word is inherited from
+      the host processor. This does not affect the execution of \moon\
+      instructions but does affect the order in which characters are
+      displayed during tracing.
+
+\item The shift instructions (\kw{sl} and \kw{sr}) of the \moon\
+      processor are simulated using the C operators \verb"<<" and
+      \verb">>". The effect of \verb">>" is undefined when the most
+      significant bit of the left operand is set. Right-shifting a
+      negative number may yield either a positive or a negative number.
+
+\item The effect of the \kw{putc} and \kw{getc} instructions depends on
+      whether the simulator is running in normal or trace mode. In
+      normal mode, \kw{getc} reads a string from the keyboard and yields
+      one character of the string each time it is executed. In trace
+      mode, you should enter characters one at a time, as \kw{getc} asks
+      for them.
+
+\end{itemize}
+\end{document}

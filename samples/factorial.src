@@ -1,0 +1,25 @@
+func factorial(integer x) : integer {
+
+    if(x <= 1)
+        then {
+            return (1);
+        } else ;
+
+    x = factorial(x - 1) * x;
+
+    return (x);
+}
+
+
+main  
+{
+
+  var
+  {
+    integer y;                                  // 1.1
+  }
+  
+    y = factorial(6);
+    write(y);    
+
+}

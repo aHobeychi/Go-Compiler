@@ -1,0 +1,21 @@
+class a {
+
+    private integer x;
+
+};
+
+class b inherits a {
+
+    private integer y;
+
+};
+
+class c inherits a,b {
+
+    private integer f;
+};
+
+main {
+
+    write(12);
+}

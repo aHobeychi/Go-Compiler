@@ -1,0 +1,9 @@
+commands to execute the samples: 
+
+moon sample.m 
+moon arithmetics.m lib.m
+moon countchars.m lib.m
+moon factorials.m lib.m
+moon genrand.m util.m
+moon stringops.m lib.m
+

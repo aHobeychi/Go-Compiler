@@ -1,0 +1,127 @@
+<START> ::= <Prog> 
+
+<Prog> ::= <ClassDecl> <FuncDef> 'main' <FuncBody> 
+
+<AParams> ::= <Expr> <AParamsTail> | EPSILON
+
+<AParamsTail> ::= ',' <Expr> <AParamsTail> | EPSILON
+
+AddOp> ::= '+' | '-' | 'or' 
+
+<ArithExpr> ::= <Term> <ArithExprTail> 
+
+<ArithExprTail> ::= <AddOp> <Term> <ArithExprTail> | EPSILON 
+
+<ArraySizeRept> ::= '[' <IntNum> ']' <ArraySizeRept> | EPSILON
+
+<AssignOp> ::= 'assign' 
+
+<AssignStatTail> ::= <AssignOp> <Expr> 
+
+<ClassDecl> ::= 'class' 'id' <Inherit> '{' <ClassDeclBody> '}' ';' <ClassDecl> | EPSILON
+
+<ClassDeclBody> ::= <Visibility> <MemberDecl> <ClassDeclBody> | EPSILON
+
+<ClassMethod> ::= 'sr' 'id' | EPSILON
+
+<Expr> ::= <ArithExpr> <ExprTail> 
+
+<ExprTail> ::= <RelOp> <ArithExpr> | EPSILON
+
+<FParams> ::= <Type> 'id' <ArraySizeRept> <FParamsTail> | EPSILON
+
+<FParamsTail> ::= ',' <Type> 'id' <ArraySizeRept> <FParamsTail> | EPSILON
+
+<Factor> ::= <FuncOrVar> 
+<Factor> ::= 'intnum' 
+<Factor> ::= 'floatnum' 
+<Factor> ::= 'stringlit' 
+<Factor> ::= '(' <Expr> ')' 
+<Factor> ::= 'not' <Factor> 
+<Factor> ::= <Sign> <Factor> 
+<Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']' 
+
+<FuncBody> ::= '{' <MethodBodyVar> <StatementList> '}' 
+
+<FuncDecl> ::= 'func' 'id' '(' <FParams> ')' ':' <FuncDeclTail> ';' 
+
+<FuncDeclTail> ::= <Type> | 'void'
+
+<FuncDef> ::= <Function> <FuncDef> | EPSILON 
+
+<FuncHead> ::= 'func' 'id' <ClassMethod> '(' <FParams> ')' ':' <FuncDeclTail> 
+
+<FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest> 
+
+<FuncOrAssignStatIdnest> ::= <IndiceRep> <FuncOrAssignStatIdnestVarTail> 
+<FuncOrAssignStatIdnest> ::= '(' <AParams> ')' <FuncOrAssignStatIdnestFuncTail> 
+
+<FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail> | EPSILON
+
+<FuncStatTail> ::= <IndiceRep> '.' 'id' <FuncStatTail> 
+<FuncStatTail> ::= '(' <AParams> ')' <FuncStatTailIdnest> 
+
+<FuncStatTailIdnest> ::= '.' 'id' <FuncStatTail> | EPSILON
+
+<FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest> | <AssignStatTail>
+
+<FuncOrVar> ::= 'id' <FuncOrVarIdnest> 
+
+<FuncOrVarIdnest> ::= <IndiceRep> <FuncOrVarIdnestTail> 
+<FuncOrVarIdnest> ::= '(' <AParams> ')' <FuncOrVarIdnestTail> 
+
+<FuncOrVarIdnestTail> ::= '.' 'id' <FuncOrVarIdnest> | EPSILON
+
+<Function> ::= <FuncHead> <FuncBody> 
+
+<IndiceRep> ::= '[' <Expr> ']' <IndiceRep> | EPSILON
+
+<Inherit> ::= 'inherits' 'id' <NestedId> | EPSILON
+
+<IntNum> ::= 'intnum' | EPSILON 
+
+<MemberDecl> ::= <FuncDev1cl> 
+<MemberDecl> ::= <VarDecl> 
+
+<MethodBodyVar> ::= 'var' '{' <VarDeclRep> '}'  | EPSILON
+
+<MultOp> ::= '*' | '/' | 'and' 
+
+<NestedId> ::= ',' 'id' <NestedId> | EPSILON
+
+<RelOp> ::= 'eq' | 'neq' | 'lt' | 'gt' | 'leq' | 'geq' 
+
+<Sign> ::= '+' | '-' 
+
+<StatBlock> ::= '{' <StatementList> '}' 
+<StatBlock> ::= <Statement> 
+<StatBlock> ::= EPSILON 
+
+<Statement> ::= <FuncOrAssignStat> ';' 
+<Statement> ::= 'if' '(' <Expr> ')' 'then' <StatBlock> 'else' <StatBlock> ';' 
+<Statement> ::= 'while' '(' <Expr> ')' <StatBlock> ';' 
+<Statement> ::= 'read' '(' <Variable> ')' ';' 
+<Statement> ::= 'write' '(' <Expr> ')' ';' 
+<Statement> ::= 'return' '(' <Expr> ')' ';' 
+<Statement> ::= 'break' ';' 
+<Statement> ::= 'continue' ';' 
+
+<StatementList> ::= <Statement> <StatementList> | EPSILON 
+
+<Term> ::= <Factor> <TermTail> 
+
+<TermTail> ::= <MultOp> <Factor> <TermTail> | EPSILON
+
+<Type> ::= 'integer' | 'float' | 'string' | 'id' 
+
+<VarDecl> ::= <Type> 'id' <ArraySizeRept> ';' 
+
+<VarDeclRep> ::= <VarDecl> <VarDeclRep> | EPSILON 
+
+<Variable> ::= 'id' <VariableIdnest> 
+
+<VariableIdnest> ::= <IndiceRep> <VariableIdnestTail> 
+
+<VariableIdnestTail> ::= '.' 'id' <VariableIdnest> | EPSILON 
+
+<Visibility> ::= 'public' | 'private' | EPSILON

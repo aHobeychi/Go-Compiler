@@ -1,0 +1,29 @@
+func multiply(integer x) : integer {
+
+   return (x);
+
+}
+
+func multiply(integer x, integer y) : integer {
+
+   return (x*y);
+}
+
+func multiply(integer x, integer y, integer z) : integer {
+
+   return (x*y*z);
+}
+
+main {
+
+   var {
+  
+      integer result;
+
+   }
+   
+   
+   write(multiply(10));
+   write(multiply(10, 10));
+   write(multiply(10, 10, 10));
+}

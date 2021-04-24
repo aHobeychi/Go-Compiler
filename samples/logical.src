@@ -1,0 +1,30 @@
+/*
+Tests for logical Operators.
+*/
+main {
+
+    var {
+        integer x;
+        integer y;
+    }
+
+    x = 1;
+    y = 1;
+
+    write(x & y);
+    write(x | y);
+
+    x = 1;
+    y = 0;
+
+    write(x & y);
+    write(x | y);
+
+    x = 0;
+    y = 0;
+
+    write(x & y);
+    write(x | y);
+    write(!(x & y));
+
+}

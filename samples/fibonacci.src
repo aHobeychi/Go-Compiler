@@ -1,0 +1,56 @@
+/*
+Function That calculates the nth fibonacci number and return it.
+*/
+func fibonacci(integer x) : integer {
+
+    var {
+        integer temp;
+    }
+
+    temp = x - 1;
+    x = x - 2;
+
+    if(x <= 0)
+        then
+          return (1);
+        else;
+
+    if(temp <= 0)
+        then
+          return (1);
+        else;
+
+
+    temp = fibonacci(temp);
+    x = fibonacci(x);
+
+    return (x + temp);
+}
+
+
+main  
+{
+
+  var
+  {
+    integer y;
+    integer arr[40];
+    integer x;
+  }   
+  
+  arr[0] = 1;
+  arr[1] = 1;
+
+  y = 2; 
+  while (y < 40) {
+       arr[y] = arr[y - 1] + arr[y - 2];
+       y = y + 1;
+   };
+   
+
+   write(arr[24]);
+   
+   y = fibonacci(25);
+   write(y);   
+}
+

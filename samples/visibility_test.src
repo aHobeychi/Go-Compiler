@@ -1,0 +1,16 @@
+class testClass {
+
+    private integer privateMember;
+    public integer publicMember;
+
+};
+
+main {
+
+    var {
+        testClass object;
+    }
+
+    object.publicMember = 123;
+    object.privateMember = 123;
+}

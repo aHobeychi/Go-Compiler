@@ -1,0 +1,108 @@
+func modulo (integer num, integer mod) : integer {
+
+
+   while (num >= mod) {
+      num = num - mod;
+   };
+
+
+   return (num);
+
+}
+
+func printOdds(integer num) : integer {
+
+   var {
+      integer isEven;   
+      integer counter;
+   }
+   
+   
+   while (counter < num) {
+        counter = counter + 1;
+        
+        isEven = modulo(counter, 2);
+        
+        if (isEven == 0)
+           then
+               continue;
+           else
+               write(counter);
+        ;
+   };
+   
+   return (0);
+}
+
+func printEvens(integer num) : integer {
+
+   var {
+      integer isEven;   
+      integer counter;
+   }
+   
+   
+   while (counter < num) {
+        counter = counter + 1;
+        
+        isEven = modulo(counter, 2);
+        
+        if (isEven == 1)
+           then
+               continue;
+           else
+               write(counter);
+        ;
+   };
+   
+   return (0);
+}
+
+func printMultiple(integer x) : integer {
+
+   var {
+      integer counter1;
+      integer counter2;
+      integer mul;
+   }
+   
+   counter1 = 1;
+   while (counter1 <= x) {
+        
+        counter2 = 1;
+        while (counter2 <= x) {
+        
+           mul = counter1*counter2;
+           write(mul);
+           counter2 = counter2 + 1;   
+        };
+        
+        counter1 = counter1 + 1;
+   
+   };
+    
+   return (0);
+}
+
+
+func breakTest() : void {
+
+    var {
+        integer x;
+    }
+
+    while (x < 100) {
+        break;
+    };
+}
+
+main {
+
+   var {
+        integer x;
+        integer isEven;
+   }    
+   
+   printEvens(100);
+   breakTest();
+}

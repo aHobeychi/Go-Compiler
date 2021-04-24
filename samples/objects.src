@@ -1,0 +1,42 @@
+class polynomial {
+    public integer sample;
+};
+
+class linear inherits polynomial {
+
+    private integer lin1;
+    private integer lin2;
+
+};
+
+class quadratic inherits polynomial {
+	public integer c[10];
+};
+
+class quadratics {
+
+    public quadratic arr[10];
+
+};
+
+
+main {
+
+    var {
+        quadratic first;
+        quadratic second[10];
+        quadratics third[10];
+    }
+
+    second[3].c[10] = 123;
+    write(second[3].c[10]);
+
+    second[3].sample = -111;
+    write(second[3].sample);
+
+    // More complecated version.
+
+    third[5].arr[5].c[23] = 12345;
+    write(third[5].arr[5].c[23]);
+
+}

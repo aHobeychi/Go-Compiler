@@ -1,0 +1,38 @@
+func first(integer x) : integer {
+
+
+    return (10);
+}
+
+func second(integer x) : integer {
+
+
+    return (x);
+}
+
+func third(integer x) : integer {
+
+
+    return (132.2313);
+}
+
+func forth(integer x) : void {
+
+
+    return (132.2313);
+}
+
+func fifth(integer x) : void {
+
+
+}
+
+func six(integer x) : float {
+
+
+}
+
+main {
+
+
+}

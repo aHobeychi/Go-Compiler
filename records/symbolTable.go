@@ -63,7 +63,6 @@ func (st *SymbolTable) GetClassList() *[]string {
 
 // Create New row and add it to the symbol table.
 func (st *SymbolTable) CreateRow(s string, kind ast.Production) bool {
-
 	switch kind {
 	case ast.FUNCTION:
 		if _, exists := st.Rows[s]; exists {
@@ -92,7 +91,6 @@ func (st *SymbolTable) CreateRow(s string, kind ast.Production) bool {
 
 // Adds Member Decl to the row
 func (st *SymbolTable) AddMemberDecl(inNode *ast.Node) {
-
 	if inNode.GetChildren()[1].Curr_type == ast.FUNCTION {
 		row, index := st.AddFuncDecl(inNode)
 		st.Rows[index] = row
@@ -112,7 +110,6 @@ func (st *SymbolTable) AddMemberDecl(inNode *ast.Node) {
 
 // Adds array information and type to variable row.
 func (st *SymbolTable) AddArrayType(iden string, arraySize *ast.Node, var_type *ast.Node) {
-
 	if st.GetRow(iden).GetKind() != ast.VARIABLE {
 		return
 	}
@@ -125,7 +122,6 @@ func (st *SymbolTable) AddArrayType(iden string, arraySize *ast.Node, var_type *
 
 // return the array size information,
 func getArraySize(arraySize *ast.Node) []int {
-
 	if !arraySize.HasChildren() {
 		return nil
 	}
@@ -141,7 +137,6 @@ func getArraySize(arraySize *ast.Node) []int {
 
 // return function decl information.
 func (st *SymbolTable) AddFuncDecl(node *ast.Node) (*FunctionRow, string) {
-
 	// Visibility of Member.
 	visibility := node.GetChildren()[0].GetChildren()[0].Curr_type
 
@@ -176,7 +171,6 @@ func (st *SymbolTable) AddFuncDecl(node *ast.Node) (*FunctionRow, string) {
 
 // return variable decl information.
 func (st *SymbolTable) AddVarDecl(node *ast.Node) (*VariableRow, string) {
-
 	visibility := node.GetChildren()[0].GetChildren()[0].Curr_type
 	variable := node.GetChildren()[1]
 	vType := variable.GetChildren()[0].Lexeme
@@ -192,7 +186,6 @@ func (st *SymbolTable) AddVarDecl(node *ast.Node) (*VariableRow, string) {
 
 // add return type to row.
 func (st *SymbolTable) AddReturnType(index string, rNode *ast.Node) {
-
 	_, return_node := rNode.Get(0)
 	rType := return_node.Lexeme
 
@@ -204,7 +197,6 @@ func (st *SymbolTable) AddReturnType(index string, rNode *ast.Node) {
 
 // add function parameters to row.
 func (st *SymbolTable) AddFParams(index string, class, rNode *ast.Node) {
-
 	var class_str string
 
 	if st.GetRow(index).GetKind() != ast.FUNCTION {
@@ -231,7 +223,6 @@ func (st *SymbolTable) AddFParams(index string, class, rNode *ast.Node) {
 
 // Format fparams nodes to parameter list.
 func formatFparams(rNode *ast.Node) *Parameters {
-
 	var func_param Parameters
 
 	if rNode.NumberOfChildren() == 0 {
@@ -253,9 +244,8 @@ func formatFparams(rNode *ast.Node) *Parameters {
 	return &func_param
 }
 
-//  Checks if a function has already been declared with the same parameter list.
+// Checks if a function has already been declared with the same parameter list.
 func (row *FunctionRow) checkDuplicates(param Parameters, class string) bool {
-
 	if len(row.ListParameters) == 0 {
 		return false
 	}
@@ -293,7 +283,6 @@ func (row *FunctionRow) checkDuplicates(param Parameters, class string) bool {
 
 // links a row to another table.
 func (sym *SymbolTable) LinkRowToTable(index string, rType ast.Production, table *SymbolTable) {
-
 	if table == nil {
 		return
 	}
@@ -314,7 +303,6 @@ func (sym *SymbolTable) LinkRowToTable(index string, rType ast.Production, table
 
 // Add Parameters to specific row.
 func addParametersToTable(row *FunctionRow, table *SymbolTable) {
-
 	if row.Name == "MAIN" {
 		return
 	}
@@ -339,12 +327,10 @@ func addParametersToTable(row *FunctionRow, table *SymbolTable) {
 			table.Rows[id] = v_row
 		}
 	}
-
 }
 
 // Adds inherits to the ClassRow
 func (st *SymbolTable) AddInherits(rowIndex string, inNode *ast.Node) {
-
 	if inNode.HasChildren() {
 		for _, child := range inNode.GetChildren() {
 			row := st.GetRow(rowIndex).(*ClassRow)
@@ -352,12 +338,10 @@ func (st *SymbolTable) AddInherits(rowIndex string, inNode *ast.Node) {
 			row.AddInherits(child.Lexeme)
 		}
 	}
-
 }
 
 // sets visibility of the row.
 func (st *SymbolTable) SetVisibility(row string, vis ast.Production) {
-
 	switch st.GetRow(row).GetKind() {
 	case ast.FUNCTION:
 		row := st.GetRow(row).(*FunctionRow)
@@ -369,17 +353,14 @@ func (st *SymbolTable) SetVisibility(row string, vis ast.Production) {
 		row := st.GetRow(row).(*ClassRow)
 		row.Visibility = vis
 	}
-
 }
 
 // sets type to row
 func (st *SymbolTable) SetVariableType(row string, vType string) {
-
 	if st.EntryExists(row) && st.GetRow(row).GetKind() == ast.VARIABLE {
 		row := st.GetRow(row).(*VariableRow)
 		row.VarType = vType
 	}
-
 }
 
 // Returns true if entry is in symbol table.
@@ -392,8 +373,7 @@ func (st *SymbolTable) EntryExists(id string) bool {
 
 // Checks if variables is an entry in the table.
 func (st *SymbolTable) ClassEntryExists(class, id string) bool {
-
-	if !(st.EntryExists(class) && st.GetRow(class).GetKind() == ast.CLASS) {
+	if !st.EntryExists(class) || st.GetRow(class).GetKind() != ast.CLASS {
 		return false
 	}
 
@@ -409,14 +389,12 @@ func sortInherits(cr *ClassRow) {
 
 // Calculates the size in memory of the elemtents in the global symbol table.
 func CalculateMemorySizes(table, global *SymbolTable) {
-
 	variables := table.variables
 
 	calculateVariableMemory(table, global, variables)
 
 	// Has to be done twice, so it can calculate the size of the class first
 	for k := range table.Rows {
-
 		switch table.GetRow(k).GetKind() {
 		case ast.CLASS:
 			CalculateMemorySizes(table.GetRow(k).(*ClassRow).Link, global)
@@ -429,7 +407,6 @@ func CalculateMemorySizes(table, global *SymbolTable) {
 	}
 
 	for k := range table.Rows {
-
 		switch table.GetRow(k).GetKind() {
 		case ast.CLASS:
 			CalculateMemorySizes(table.GetRow(k).(*ClassRow).Link, global)
@@ -444,7 +421,6 @@ func CalculateMemorySizes(table, global *SymbolTable) {
 
 // Calculates the size of variables in bytes.
 func calculateVariableMemory(table, global *SymbolTable, variables []string) {
-
 	if len(variables) == 0 {
 		return
 	}
@@ -464,12 +440,10 @@ func calculateVariableMemory(table, global *SymbolTable, variables []string) {
 	}
 
 	table.offset = total
-
 }
 
 // Calculates the size of the class by adding those of its variables.
 func calculateClassMemory(table, global *SymbolTable) {
-
 	variables := table.variables
 	className := table.Scope
 
@@ -486,7 +460,6 @@ func calculateClassMemory(table, global *SymbolTable) {
 
 // Calculates the requiered memory of a subclass by adding the size of its parent classes.
 func calculateInheritedMemory(class string, global *SymbolTable) int {
-
 	classRow := global.GetRow(class).(*ClassRow)
 	inherits := classRow.Inherits
 	total := classRow.Total_Memory
@@ -500,7 +473,6 @@ func calculateInheritedMemory(class string, global *SymbolTable) int {
 
 // Returns the size of the types.
 func GetTypeSize(v_t string, global *SymbolTable) int {
-
 	if size, base := typeAsSize[v_t]; base {
 		return size
 	}
@@ -514,7 +486,6 @@ func GetTypeSize(v_t string, global *SymbolTable) int {
 
 // Get the total number of array elements.
 func getArrayTotal(array []int) int {
-
 	if len(array) == 0 {
 		return 1
 	}
@@ -530,7 +501,6 @@ func getArrayTotal(array []int) int {
 
 // Returns the vilibity of the function. with the param list.
 func (table *SymbolTable) GetVisibilityFromParam(funcName string, params *Parameters) ast.Production {
-
 	for _, rows := range table.Rows {
 
 		if rows.GetKind() != ast.FUNCTION {
@@ -544,7 +514,6 @@ func (table *SymbolTable) GetVisibilityFromParam(funcName string, params *Parame
 		}
 
 		for index, params := range funcRow.ListParameters {
-
 			if params.MatchParameter(params) {
 				return funcRow.Visibility[index]
 			}
@@ -556,7 +525,6 @@ func (table *SymbolTable) GetVisibilityFromParam(funcName string, params *Parame
 
 // Calculates the offset in for variables in the symbol table
 func (table *SymbolTable) CalculateOffset(varName string, gb *SymbolTable) {
-
 	previous := table.variables[len(table.variables)-1]
 
 	previousVar := table.GetRow(previous).(*VariableRow)
@@ -566,20 +534,16 @@ func (table *SymbolTable) CalculateOffset(varName string, gb *SymbolTable) {
 
 	variableRow.Memory_Address = new_offset
 	variableRow.Memory_Size = GetTypeSize(variableRow.VarType, gb)
-
 }
 
 // Return the offset of the variable.
 func (table *SymbolTable) GetOffSet(varName string) int {
-
 	variableRow := table.GetRow(varName).(*VariableRow)
 	return variableRow.Memory_Address
-
 }
 
 // Returns the total memory in the table.
 func (table *SymbolTable) GetMemoryTotal() int {
-
 	total := 0
 
 	for _, varName := range table.variables {
@@ -593,15 +557,12 @@ func (table *SymbolTable) GetMemoryTotal() int {
 
 // Adds row to the start of the table.
 func (table *SymbolTable) AddRowToStart(label, v_Type string) {
-
 	table.variables = append([]string{label}, table.variables...)
 	table.Rows[label] = &VariableRow{Name: label, Kind: ast.VARIABLE, VarType: v_Type}
-
 }
 
 // Returns the link to the functionTable with a set of annotated parameters.
 func (table *SymbolTable) AnnotatedParamsToLink(funcName string, aparams *ast.Node) *SymbolTable {
-
 	funcRow := table.GetRow(funcName).(*FunctionRow)
 	num_of_aparams := aparams.NumberOfChildren()
 
@@ -610,9 +571,7 @@ func (table *SymbolTable) AnnotatedParamsToLink(funcName string, aparams *ast.No
 	for i, parameters := range params {
 
 		if parameters[0].Iden == "" && num_of_aparams == 0 {
-
 			return funcRow.Link[i]
-
 		}
 
 		if len(parameters) != num_of_aparams {
@@ -620,11 +579,8 @@ func (table *SymbolTable) AnnotatedParamsToLink(funcName string, aparams *ast.No
 		}
 
 		for index, aparam := range aparams.GetChildren() {
-
 			if aparam.Semantic_Type == parameters[index].BaseType {
-
 				return funcRow.Link[i]
-
 			}
 		}
 	}

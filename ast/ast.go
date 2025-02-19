@@ -41,7 +41,6 @@ func New(node Production, lexeme string) *Node {
 }
 
 func (n *Node) Get(index int) (bool, *Node) {
-
 	if n.NumberOfChildren() <= index {
 		return false, nil
 	}
@@ -50,7 +49,6 @@ func (n *Node) Get(index int) (bool, *Node) {
 }
 
 func (n *Node) GetChild(prod Production) (bool, *Node) {
-
 	if !n.HasChildren() {
 		return false, nil
 	}
@@ -64,7 +62,6 @@ func (n *Node) GetChild(prod Production) (bool, *Node) {
 
 // Returns the number of children of the node.
 func (n *Node) NumberOfChildren() int {
-
 	if n.children == nil {
 		return 0
 	}
@@ -74,9 +71,7 @@ func (n *Node) NumberOfChildren() int {
 
 // Checks if the node has a specific child and returns it.
 func (n *Node) CheckHasChild(prod Production) (bool, *Node) {
-
 	for _, child := range n.GetChildren() {
-
 		if child.Curr_type == prod {
 			return true, child
 		}
@@ -87,12 +82,7 @@ func (n *Node) CheckHasChild(prod Production) (bool, *Node) {
 
 // Returns if the current node has any children.
 func (n *Node) HasChildren() bool {
-
-	if n.NumberOfChildren() != 0 {
-		return true
-	}
-
-	return false
+	return n.NumberOfChildren() != 0
 }
 
 // Returns a Pointers to the array containing all the nodes children.
@@ -107,7 +97,6 @@ func (n *Node) GetParent() *Node {
 
 // Must Use Preorder Traversal
 func (n *Node) Traverse(depth int) {
-
 	for i := 0; i < depth; i++ {
 		print("   ")
 	}
@@ -123,7 +112,6 @@ func (n *Node) Traverse(depth int) {
 
 // Traverses the AST and Prints the production to a file.
 func (n *Node) TraverseToFile(depth int, file *os.File) {
-
 	for i := 0; i < depth; i++ {
 		file.WriteString("   ")
 	}
@@ -150,7 +138,6 @@ func (n *Node) GetLineNumber() int {
 
 // Migrates the tag to the parents, used to help with code translation.
 func (n *Node) MigrateTagToParents(tag string) {
-
 	n.Semantic_Call = tag
 
 	if n.parent.Curr_type != IDENTIFIER {

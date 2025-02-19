@@ -9,7 +9,6 @@ import (
 
 // Links Subclass to Parent class, Checks if inherited class exists.
 func Inheritance_check(global *records.SymbolTable) bool {
-
 	gb_table = global
 
 	correct := true
@@ -30,9 +29,7 @@ func Inheritance_check(global *records.SymbolTable) bool {
 			_, exists := gb_table.Rows[class]
 
 			if exists && gb_table.GetRow(class).GetKind() == ast.CLASS {
-
 				classrow.InheritedLink[class] = gb_table.GetRow(class).(*records.ClassRow).Link
-
 			} else {
 
 				outputMessage("Class " + class + " doesn't exist at line: ")
@@ -43,10 +40,8 @@ func Inheritance_check(global *records.SymbolTable) bool {
 		}
 	}
 
-	if correct == true {
-
+	if correct {
 		return checkForCircularInherits(gb_table)
-
 	} else {
 
 		checkForCircularInherits(gb_table)
@@ -56,7 +51,6 @@ func Inheritance_check(global *records.SymbolTable) bool {
 
 // Checks if file contains inheritance loops
 func checkForCircularInherits(gb_table *records.SymbolTable) bool {
-
 	for k := range gb_table.Rows {
 
 		row := gb_table.GetRow(k)
@@ -73,7 +67,6 @@ func checkForCircularInherits(gb_table *records.SymbolTable) bool {
 		}
 
 		for _, class := range inheritedClasses {
-
 			if k == class {
 				outputMessage("Class Cannot import itself. Line: " + classrow.GetLine() + "\n")
 			}
@@ -121,7 +114,6 @@ func checkForCircularInherits(gb_table *records.SymbolTable) bool {
 
 // Checks if the class exists in the gb_table.
 func rowIsClass(class string) bool {
-
 	if !gb_table.EntryExists(class) {
 		return false
 	}
@@ -137,7 +129,6 @@ func rowIsClass(class string) bool {
 
 // Add Parent var into the child class's symbol Table
 func mergeTable(root *ast.Node) {
-
 	classes := gb_table.GetClassList()
 
 	for i := 0; i < len(*classes); i++ {
@@ -148,11 +139,9 @@ func mergeTable(root *ast.Node) {
 			addParentNodes(classRow.Link, inheritedClasses)
 		}
 	}
-
 }
 
 func addParentNodes(classTable *records.SymbolTable, parents []string) {
-
 	for _, parent := range parents {
 
 		parentClass := gb_table.GetRow(parent).(*records.ClassRow)

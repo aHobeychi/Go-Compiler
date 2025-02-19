@@ -56,8 +56,7 @@ func (vr *ClassRow) AddInherits(class string) {
 
 // Returns If One of the parent classes contains that id.
 func (st *SymbolTable) InheritsSearch(class, id string) bool {
-
-	if !(st.EntryExists(class) && st.GetRow(class).GetKind() == ast.CLASS) {
+	if !st.EntryExists(class) || st.GetRow(class).GetKind() != ast.CLASS {
 		return false
 	}
 
@@ -78,7 +77,7 @@ func (st *SymbolTable) InheritsSearch(class, id string) bool {
 		if table.EntryExists(id) && table.GetRow(id).GetKind() == ast.VARIABLE {
 			return true
 		}
-		if st.InheritsSearch(inherited, id) == true {
+		if st.InheritsSearch(inherited, id) {
 			return true
 		}
 	}
@@ -88,8 +87,7 @@ func (st *SymbolTable) InheritsSearch(class, id string) bool {
 
 // Checks if variable id is inherited from a parent class.
 func (st *SymbolTable) InheritsFromParen(class, id string) bool {
-
-	if !(st.EntryExists(class) && st.GetRow(class).GetKind() == ast.CLASS) {
+	if !st.EntryExists(class) || st.GetRow(class).GetKind() != ast.CLASS {
 		return false
 	}
 
@@ -106,7 +104,7 @@ func (st *SymbolTable) InheritsFromParen(class, id string) bool {
 		if table.EntryExists(id) && table.GetRow(id).GetKind() == ast.VARIABLE {
 			return true
 		}
-		if st.InheritsSearch(inherited, id) == true {
+		if st.InheritsSearch(inherited, id) {
 			return true
 		}
 	}
@@ -116,8 +114,7 @@ func (st *SymbolTable) InheritsFromParen(class, id string) bool {
 
 // Returns Type Of Parent Id
 func (st *SymbolTable) GetInheritedVar(class, id string) *VariableRow {
-
-	if !(st.EntryExists(class) && st.GetRow(class).GetKind() == ast.CLASS) {
+	if !st.EntryExists(class) || st.GetRow(class).GetKind() != ast.CLASS {
 		return nil
 	}
 
@@ -138,7 +135,7 @@ func (st *SymbolTable) GetInheritedVar(class, id string) *VariableRow {
 		if table.EntryExists(id) && table.GetRow(id).GetKind() == ast.VARIABLE {
 			return table.GetRow(id).(*VariableRow)
 		}
-		if st.InheritsSearch(inherited, id) == true {
+		if st.InheritsSearch(inherited, id) {
 			return st.GetInheritedVar(inherited, id)
 		}
 	}

@@ -27,10 +27,7 @@ func init() {
 }
 
 func main() {
-
-	usage_message :=
-
-		`To Run the compiler, Please run the program with the program using the following flags:
+	usage_message := `To Run the compiler, Please run the program with the program using the following flags:
 
             -i:         followed by the input file.
             -o:         followed by the ouput path.
@@ -42,7 +39,7 @@ func main() {
 
 	flag.Parse()
 
-	if *h == true {
+	if *h {
 		print("\n" + usage_message + "\n")
 	}
 
@@ -56,7 +53,6 @@ func main() {
 		print(" Use -h for help message..\n\n")
 		return
 	}
-
 	comp, _ := compiler.New(*i, *o)
 	comp.SetFlags(*verbose, *ast, *symbol)
 	comp.ParseFile()

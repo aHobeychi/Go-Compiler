@@ -11,15 +11,11 @@ var type_correct bool
 
 // Runs the type checking.
 func type_check(root *ast.Node, scope string) bool {
-
 	type_correct = true
 
 	for _, child := range root.GetChildren() {
-
 		if child.Curr_type == ast.MAIN {
-
 			check_function_types("MAIN", "", "", nil, child)
-
 		} else if child.Curr_type == ast.FUNCDEF {
 
 			if !child.HasChildren() {
@@ -35,9 +31,7 @@ func type_check(root *ast.Node, scope string) bool {
 				_, funcClass := funcHead.GetChild(ast.CLASSMETHOD)
 
 				if funcClass.HasChildren() {
-
 					classMethod = funcClass.GetChildren()[0].Lexeme
-
 				}
 
 				_, fparams := funcHead.GetChild(ast.FPARAMS)
@@ -53,7 +47,6 @@ func type_check(root *ast.Node, scope string) bool {
 
 // checks the function body.
 func check_function_types(funcName, class, p_t string, params, root *ast.Node) {
-
 	func_table := gb_table.GetRow(funcName).(*records.FunctionRow)
 
 	if funcName == "MAIN" {
@@ -68,7 +61,6 @@ func check_function_types(funcName, class, p_t string, params, root *ast.Node) {
 
 // Runs the checks on the inside of the body types.
 func check_body_types(location, scope *records.SymbolTable, classMethod, p_t string, root *ast.Node) {
-
 	cType := root.Curr_type
 
 	if root.Curr_type == ast.VARIABLEDECL {
@@ -118,7 +110,6 @@ func check_body_types(location, scope *records.SymbolTable, classMethod, p_t str
 	}
 
 	if cType == ast.BREAK || cType == ast.CONTINUE {
-
 		if !searchForWhile(root) {
 
 			outputMessage("Cannot have a " + ast.TypesStrings[cType] + " statement outside a while loop. Line: " + root.GetLine() + ".\n")
@@ -127,17 +118,14 @@ func check_body_types(location, scope *records.SymbolTable, classMethod, p_t str
 	}
 
 	if root.HasChildren() {
-
 		for _, child := range root.GetChildren() {
 			check_body_types(location, scope, classMethod, "", child)
 		}
 	}
-
 }
 
 // Checks if the two sides of the rel-op match.
 func check_rel_op(location, scope *records.SymbolTable, classMethod string, node *ast.Node) *records.Variables {
-
 	left := node.GetChildren()[0]
 	right := node.GetChildren()[1]
 
@@ -182,7 +170,6 @@ func check_rel_op(location, scope *records.SymbolTable, classMethod string, node
 
 // Checks to see if the two types of the assignment match.
 func check_assign(location, scope *records.SymbolTable, classMethod string, node *ast.Node) {
-
 	left := node.GetChildren()[0]
 	right := node.GetChildren()[1]
 
@@ -209,7 +196,6 @@ func check_assign(location, scope *records.SymbolTable, classMethod string, node
 
 // Handle the type of arith expression
 func handle_arith_type(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	left := node.GetChildren()[0]
 	right := node.GetChildren()[1]
 
@@ -237,7 +223,6 @@ func handle_arith_type(location, scope *records.SymbolTable, classMethod, p_t st
 
 // Returns the expressiong type
 func get_expression_type(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	switch node.Curr_type {
 
 	case ast.INT_VALUE:
@@ -268,7 +253,6 @@ func get_expression_type(location, scope *records.SymbolTable, classMethod, p_t 
 
 // Handles ternary expression.
 func handle_ternary_expr(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	first := node.GetChildren()[0]
 	middle := node.GetChildren()[1]
 	last := node.GetChildren()[2]
@@ -301,7 +285,6 @@ func handle_ternary_expr(location, scope *records.SymbolTable, classMethod, p_t 
 
 // Handles not statement.
 func handle_not(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	left := node.GetChildren()[0]
 	lType := get_expression_type(location, scope, classMethod, p_t, left)
 
@@ -319,7 +302,6 @@ func handle_not(location, scope *records.SymbolTable, classMethod, p_t string, n
 
 // Handle the type of arith expression
 func handle_signed_value(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	left := node.GetChildren()[0]
 
 	lType := get_expression_type(location, scope, classMethod, p_t, left)
@@ -337,7 +319,6 @@ func handle_signed_value(location, scope *records.SymbolTable, classMethod, p_t 
 
 // Handles the type of the identifier.
 func handle_id_type(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	if exists, _ := node.GetChild(ast.APARAMS); exists {
 		return function_type(location, scope, classMethod, p_t, node)
 	} else {
@@ -347,7 +328,6 @@ func handle_id_type(location, scope *records.SymbolTable, classMethod, p_t strin
 
 // Returns the type of the identifier.
 func identifier_type(location, class *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	identifierName := node.Lexeme
 	var varType string
 	var varRow *records.VariableRow
@@ -386,7 +366,7 @@ func identifier_type(location, class *records.SymbolTable, classMethod, p_t stri
 		return records.NewVariable("invalid")
 	}
 
-	if !(varType == "integer" || varType == "float" || varType == "string") {
+	if varType != "integer" && varType != "float" && varType != "string" {
 		if !gb_table.EntryExists(varType) {
 
 			outputMessage("Variable type " + varType + " has not been defined in file")
@@ -464,12 +444,10 @@ func identifier_type(location, class *records.SymbolTable, classMethod, p_t stri
 		}
 
 	}
-
 }
 
 // Returns the return type of the function.
 func function_type(location, scope *records.SymbolTable, classMethod, p_t string, node *ast.Node) *records.Variables {
-
 	return_type := "invalid"
 	funcName := node.Lexeme
 	_, aparams := node.GetChild(ast.APARAMS)
@@ -488,7 +466,6 @@ func function_type(location, scope *records.SymbolTable, classMethod, p_t string
 	}
 
 	if p_t != "" {
-
 		if gb_table.EntryExists(p_t) {
 
 			classRow := gb_table.GetRow(p_t).(*records.ClassRow)
@@ -552,7 +529,6 @@ func function_type(location, scope *records.SymbolTable, classMethod, p_t string
 
 // converts Aparams to Fparams format to help with comparison
 func convertToFparams(location, scope *records.SymbolTable, classMethod string, aparams *ast.Node) *records.Parameters {
-
 	var func_param records.Parameters
 
 	if aparams.NumberOfChildren() == 0 {

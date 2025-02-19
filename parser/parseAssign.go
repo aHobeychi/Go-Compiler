@@ -7,7 +7,6 @@ import (
 
 // Func for the <FuncOrAssignStat> ::= 'id' <FuncOrAssignStatIdnest> Prod.
 func (p *Parser) parseFuncOrAssignStat() *ast.Node {
-
 	if !p.skipErrors(ast.FUNCORASSIGNSTAT) {
 		return nil
 	}
@@ -49,7 +48,6 @@ func (p *Parser) parseFuncOrAssignStat() *ast.Node {
 // <FuncOrAssignStatIdnest> ::= <IndiceRep> <FuncOrAssignStatIdnestVarTail>
 // <FuncOrAssignStatIdnest> ::= '(' <AParams> ')' <FuncOrAssignStatIdnestFuncTail>
 func (p *Parser) parseFuncOrAssignStatIdnest() (*ast.Node, *ast.Node) {
-
 	if !p.skipErrors(ast.FUNCORASSIGNSTATIDNEST) {
 		return nil, nil
 	}
@@ -58,16 +56,15 @@ func (p *Parser) parseFuncOrAssignStatIdnest() (*ast.Node, *ast.Node) {
 	var right *ast.Node
 
 	p.printProductions("<FUNCORASSIGNSTATIDNEST>")
-	if p.thisToken.Type == lexer.LPAREN {
+	switch p.thisToken.Type {
+	case lexer.LPAREN:
 
 		p.readToken()
 
 		left = p.parseAParams()
 
 		if p.thisToken.Type == lexer.RPAREN {
-
 			p.readToken()
-
 		} else {
 
 			p.printMissingMessage(lexer.RPAREN)
@@ -78,13 +75,12 @@ func (p *Parser) parseFuncOrAssignStatIdnest() (*ast.Node, *ast.Node) {
 
 		right = (p.parseFuncOrAssignStatIdnestFuncTail())
 
-	} else if p.thisToken.Type == lexer.LBRACKET {
+	case lexer.LBRACKET:
 
 		left = p.parseIndiceRep()
 		right = (p.parseFuncOrAssignStatIdnestVartail())
 
-	} else {
-
+	default:
 		return p.parseFuncOrAssignStatIdnestVartail(), nil
 	}
 
@@ -94,21 +90,16 @@ func (p *Parser) parseFuncOrAssignStatIdnest() (*ast.Node, *ast.Node) {
 // Function for the productions:
 // <FuncOrAssignStatIdnestFuncTail> ::= '.' 'id' <FuncStatTail> | EPSILON
 func (p *Parser) parseFuncOrAssignStatIdnestFuncTail() *ast.Node {
-
 	var id *ast.Node
 
 	p.printProductions("<FUNCORASSIGNSTATIDNESTFUNCTAIL")
 
-	if p.thisToken.Type == lexer.DOT {
-
+	switch p.thisToken.Type {
+	case lexer.DOT:
 		p.readToken()
-
-	} else if p.thisToken.Type == lexer.IDENT {
-
+	case lexer.IDENT:
 		p.printProductions(".")
-
-	} else {
-
+	default:
 		return nil
 	}
 
@@ -125,7 +116,6 @@ func (p *Parser) parseFuncOrAssignStatIdnestFuncTail() *ast.Node {
 // <FuncStatTail> ::= <IndiceRep> '.' 'id' <FuncStatTail>
 // <FuncStatTail> ::= '(' <AParams> ')' <FuncStatTailIdnest>
 func (p *Parser) parseFuncStatTail() (*ast.Node, *ast.Node) {
-
 	var left *ast.Node
 	var right *ast.Node
 
@@ -135,7 +125,8 @@ func (p *Parser) parseFuncStatTail() (*ast.Node, *ast.Node) {
 
 	p.printProductions("PARSEFUNCSTATTAIL")
 
-	if p.thisToken.Type == lexer.LBRACKET {
+	switch p.thisToken.Type {
+	case lexer.LBRACKET:
 
 		left = p.parseIndiceRep()
 
@@ -152,16 +143,14 @@ func (p *Parser) parseFuncStatTail() (*ast.Node, *ast.Node) {
 			return left, id
 		}
 
-	} else if p.thisToken.Type == lexer.LPAREN {
+	case lexer.LPAREN:
 
 		p.readToken()
 
 		left = p.parseAParams()
 
 		if p.thisToken.Type == lexer.RPAREN {
-
 			p.readToken()
-
 		} else {
 
 			p.readTillSymbol(lexer.SEMICOLON)
@@ -178,7 +167,6 @@ func (p *Parser) parseFuncStatTail() (*ast.Node, *ast.Node) {
 // Function for the
 // <FuncStatTailIdnest> ::= '.' 'id' <FuncStatTail> | EPSILON Production
 func (p *Parser) parseFuncStatTailIdnest() *ast.Node {
-
 	var tail *ast.Node
 
 	p.printProductions("FUNCSTATTAILIDNEST")
@@ -201,10 +189,10 @@ func (p *Parser) parseFuncStatTailIdnest() *ast.Node {
 }
 
 // Function to parser the
-//       <FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest>
-//       | <AssignStatTail> Production
+//
+//	<FuncOrAssignStatIdnestVarTail> ::= '.' 'id' <FuncOrAssignStatIdnest>
+//	| <AssignStatTail> Production
 func (p *Parser) parseFuncOrAssignStatIdnestVartail() *ast.Node {
-
 	var tail *ast.Node
 
 	p.printProductions("<FUNCORASSIGNSTATIDNESTVARTAIL>")

@@ -8,18 +8,15 @@ import (
 
 // Checks for the existance of return type and actual return of that type.
 func return_check(root *ast.Node) bool {
-
 	correct := true
 
 	for _, child := range root.GetChildren() {
-
 		if child.Curr_type == ast.MAIN {
 			if check_main_has_return(child) {
 				outputMessage("Main function cannot have return statement. Line: " + child.GetLine() + "\n")
 				correct = false
 				continue
 			}
-
 		} else if child.Curr_type == ast.FUNCDEF {
 
 			if !child.HasChildren() {
@@ -124,27 +121,19 @@ func return_check(root *ast.Node) bool {
 
 // checks if there is multiple return statements in the same function
 func check_for_multiple_return(stat *ast.Node) bool {
-
 	num_of_return := 0
 
 	for _, node := range stat.GetChildren() {
-
 		if node.Curr_type == ast.RETURN {
-
 			num_of_return += 1
 		}
 	}
 
-	if num_of_return > 1 {
-		return false
-	}
-
-	return true
+	return num_of_return <= 1
 }
 
 // Returns true, if main function has return statement.
 func check_main_has_return(main *ast.Node) bool {
-
 	implemented, body := main.GetChild(ast.FUNCTIONBODY)
 
 	if !implemented {

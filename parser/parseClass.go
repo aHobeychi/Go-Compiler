@@ -9,9 +9,9 @@ import (
 
 // Parses the -->
 // <ClassDecl> ::= 'class' 'id' <Inherit> '{' <ClassDeclBody> '}' ';' <ClassDecl>
-//                  | EPSILON
+//
+//	| EPSILON
 func (p *Parser) parseClassDecl() *ast.Node {
-
 	p.printProductions("CLASSDECL\n")
 
 	classDecls := ast.New(ast.CLASSDECL, "")
@@ -25,11 +25,8 @@ func (p *Parser) parseClassDecl() *ast.Node {
 		classDecl := ast.New(ast.CLASS, "")
 
 		if p.thisToken.Type == lexer.CLASS {
-
 			p.readToken()
-
 		} else {
-
 			break
 		}
 
@@ -51,11 +48,8 @@ func (p *Parser) parseClassDecl() *ast.Node {
 		classDecl.AddChild(inherits)
 
 		if p.thisToken.Type == lexer.LBRACE {
-
 			p.readToken()
-
 		} else {
-
 			p.printMissingMessage(lexer.LBRACE)
 		}
 
@@ -63,22 +57,16 @@ func (p *Parser) parseClassDecl() *ast.Node {
 		classDecl.AddChild(classDeclBody)
 
 		if p.thisToken.Type == lexer.RBRACE {
-
 			p.readToken()
-
 		} else {
-
 			p.printMissingMessage(lexer.RBRACE)
 		}
 
 		classDecls.AddChild(classDecl)
 
 		if p.thisToken.Type == lexer.SEMICOLON {
-
 			p.readToken()
-
 		} else {
-
 			p.printMissingMessage(lexer.SEMICOLON)
 		}
 
@@ -96,9 +84,9 @@ func (p *Parser) parseClassDecl() *ast.Node {
 }
 
 // Parses the <ClassDeclBody> ::= <Visibility> <MemberDecl> <ClassDeclBody>
-//                                | EPSILON
+//
+//	| EPSILON
 func (p *Parser) parseClassDeclBody(classType string) (*ast.Node, *records.SymbolTable) {
-
 	if !p.skipErrors(ast.CLASSDECLBODY) {
 		return nil, nil
 	}
@@ -107,12 +95,8 @@ func (p *Parser) parseClassDeclBody(classType string) (*ast.Node, *records.Symbo
 	p.printProductions("ClassDeclBody")
 	classBodyTable := records.NewTable(classType)
 
-	for {
-
-		if !(p.thisToken.Type == lexer.PUBLIC || p.thisToken.Type == lexer.PRIVATE ||
-			p.tokenIsType() || p.thisToken.Type == lexer.FUNCTION) {
-			break
-		}
+	for p.thisToken.Type == lexer.PUBLIC || p.thisToken.Type == lexer.PRIVATE ||
+		p.tokenIsType() || p.thisToken.Type == lexer.FUNCTION {
 
 		vis := p.parseVisibility()
 		memdecl := p.parseMemberDecl()
@@ -131,7 +115,6 @@ func (p *Parser) parseClassDeclBody(classType string) (*ast.Node, *records.Symbo
 
 // Parses the <MemberDecl> ::= <FuncDecl> | <MemberDecl> ::= <VarDecl> Prod.
 func (p *Parser) parseMemberDecl() *ast.Node {
-
 	if !p.skipErrors(ast.MEMBERDECL) {
 		return nil
 	}
@@ -145,7 +128,6 @@ func (p *Parser) parseMemberDecl() *ast.Node {
 
 // Parses the <VarDecl> ::= <Type> 'id' <ArraySizeRept> ';' Prod.
 func (p *Parser) parseVarDecl() *ast.Node {
-
 	if !p.skipErrors(ast.VARIABLEDECL) {
 		return nil
 	}
@@ -167,11 +149,8 @@ func (p *Parser) parseVarDecl() *ast.Node {
 	variable.AddChild(p.parseArraySizeRept())
 
 	if p.thisToken.Type == lexer.SEMICOLON {
-
 		p.readToken()
-
 	} else {
-
 		p.printMissingMessage(lexer.SEMICOLON)
 	}
 
@@ -186,7 +165,6 @@ func (p *Parser) parseVarDecl() *ast.Node {
 // <Inherit> ::= 'inherits' 'id' <NestedId> | EPSILON
 // <NestedId> ::= ',' 'id' <NestedId> | EPSILON
 func (p *Parser) parseInherit() *ast.Node {
-
 	var inherits *ast.Node
 	p.printProductions("Inherits:")
 
@@ -195,11 +173,8 @@ func (p *Parser) parseInherit() *ast.Node {
 	}
 
 	if p.thisToken.Type == lexer.INHERITS {
-
 		p.readToken()
-
 	} else {
-
 		return ast.New(ast.INHERITS, "")
 	}
 
@@ -210,11 +185,7 @@ func (p *Parser) parseInherit() *ast.Node {
 	inherits = ast.New(ast.INHERITS, "")
 	inherits.Line = p.getLineNumber()
 
-	for {
-
-		if p.thisToken.Type != lexer.IDENT {
-			break
-		}
+	for p.thisToken.Type == lexer.IDENT {
 
 		id := p.parseIdentifier()
 
@@ -239,12 +210,10 @@ func (p *Parser) parseInherit() *ast.Node {
 
 	}
 	return inherits
-
 }
 
 // Parses the <ClassMethod> ::= 'sr' 'id' | EPSILON Prod.
 func (p *Parser) parseClassMethod() *ast.Node {
-
 	classMethod := ast.New(ast.CLASSMETHOD, "")
 	p.printProductions("ClassMethod: ")
 
@@ -258,16 +227,12 @@ func (p *Parser) parseClassMethod() *ast.Node {
 		p.printMissingMessage(lexer.CLASS)
 	}
 
-	if p.thisToken.Type == lexer.DCOLON {
-
+	switch p.thisToken.Type {
+	case lexer.DCOLON:
 		p.readToken()
-
-	} else if p.thisToken.Type == lexer.IDENT {
-
+	case lexer.IDENT:
 		p.printMissingMessage(lexer.DCOLON)
-
-	} else {
-
+	default:
 		return ast.New(ast.CLASSMETHOD, "")
 	}
 

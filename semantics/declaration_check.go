@@ -11,17 +11,13 @@ var decl_valid bool
 // Checks if all referenced variables have already been
 // declared or exists in the scope.
 func declaration_check(root *ast.Node) bool {
-
 	decl_valid = true
 
 	check_types_exist()
 
 	for _, child := range root.GetChildren() {
-
 		if child.Curr_type == ast.MAIN {
-
 			verifyFunction("MAIN", "", nil, child)
-
 		} else if child.Curr_type == ast.FUNCDEF {
 
 			if !child.HasChildren() {
@@ -39,9 +35,7 @@ func declaration_check(root *ast.Node) bool {
 				_, funcBody := function.GetChild(ast.FUNCTIONBODY)
 
 				if funcClass.HasChildren() {
-
 					classMethod = funcClass.GetChildren()[0].Lexeme
-
 				} else {
 					classMethod = ""
 				}
@@ -55,7 +49,6 @@ func declaration_check(root *ast.Node) bool {
 }
 
 func check_types_exist() {
-
 	for k := range gb_table.Rows {
 
 		row := gb_table.GetRow(k)
@@ -76,13 +69,10 @@ func check_types_exist() {
 		}
 
 	}
-
 }
 
 func check_function_contents(funcrow *records.FunctionRow) {
-
 	for _, tables := range funcrow.Link {
-
 		for k := range tables.Rows {
 
 			row := tables.GetRow(k)
@@ -111,7 +101,6 @@ func check_function_contents(funcrow *records.FunctionRow) {
 }
 
 func check_class_contents(class_table *records.SymbolTable) {
-
 	for k := range class_table.Rows {
 
 		row := class_table.GetRow(k)
@@ -137,12 +126,10 @@ func check_class_contents(class_table *records.SymbolTable) {
 		}
 
 	}
-
 }
 
 // // will branch to diferrent functions, to check their func bodies.
 func verifyFunction(func_name, class string, params, root *ast.Node) {
-
 	func_table := gb_table.GetRow(func_name).(*records.FunctionRow)
 
 	if func_name == "MAIN" {
@@ -158,7 +145,6 @@ func verifyFunction(func_name, class string, params, root *ast.Node) {
 
 // Will check all the variables inside the function body to see if they been declared.
 func verifyFunctionBody(table, scope *records.SymbolTable, classMethod string, root *ast.Node) {
-
 	if root.Curr_type == ast.VARIABLEDECL {
 
 		handleVariableDec(root, table)
@@ -172,28 +158,21 @@ func verifyFunctionBody(table, scope *records.SymbolTable, classMethod string, r
 	}
 
 	if root.HasChildren() {
-
 		for _, child := range root.GetChildren() {
-
 			verifyFunctionBody(table, scope, classMethod, child)
 		}
 	}
 }
 
 func handleIdentifer(location, class *records.SymbolTable, classMethod, pt string, node *ast.Node) {
-
 	if exists, _ := node.GetChild(ast.APARAMS); exists {
-
 		handleFunction(location, class, classMethod, pt, node)
-
 	} else {
-
 		handleVariable(location, class, classMethod, pt, node)
 	}
 }
 
 func handleVariable(location, class *records.SymbolTable, classMethod, pt string, node *ast.Node) {
-
 	var varType string
 	var varRow *records.VariableRow
 
@@ -279,11 +258,9 @@ func handleVariable(location, class *records.SymbolTable, classMethod, pt string
 		handleIdentifer(location, new_class_table, classMethod, varType, child)
 
 	}
-
 }
 
 func handleFunction(location, class *records.SymbolTable, classMethod, pt string, node *ast.Node) {
-
 	return_type := "invalid"
 
 	funcName := node.Lexeme
@@ -318,7 +295,6 @@ func handleFunction(location, class *records.SymbolTable, classMethod, pt string
 }
 
 func handleVariableDec(root *ast.Node, location *records.SymbolTable) {
-
 	if !root.HasChildren() {
 		return
 	}
@@ -329,8 +305,7 @@ func handleVariableDec(root *ast.Node, location *records.SymbolTable) {
 
 		v_t := variable_type.Lexeme
 
-		if !(v_t == "integer" || v_t == "float" || v_t == "string") {
-
+		if v_t != "integer" && v_t != "float" && v_t != "string" {
 			if !gb_table.EntryExists(v_t) {
 
 				outputMessage("No Type: " + v_t + ", in var decl of func: ")
@@ -349,5 +324,4 @@ func handleVariableDec(root *ast.Node, location *records.SymbolTable) {
 			}
 		}
 	}
-
 }

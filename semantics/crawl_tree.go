@@ -15,14 +15,13 @@ func outputMessage(message string) {
 
 // Runs all the tests and returns if the input file passes.
 func CrawlTree(table *records.SymbolTable, root *ast.Node) bool {
-
 	gb_table = table
 
 	decl := declaration_check(root)
 	return_res := return_check(root)
 	class_func := class_func_check()
 
-	if !(decl && return_res && class_func) {
+	if !decl || !return_res || !class_func {
 		return false
 	}
 

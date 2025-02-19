@@ -33,7 +33,6 @@ func (p *Parser) SetVerbose(verbose bool) {
 
 // Return a new Parser.
 func New(l *lexer.Lexer, verbose bool, err string, prod string) *Parser {
-
 	first := ast.GenerateFirstSet()
 	follow := ast.GenerateFollowSet()
 
@@ -44,7 +43,8 @@ func New(l *lexer.Lexer, verbose bool, err string, prod string) *Parser {
 		parser := &Parser{
 			l: l, verbose: verbose,
 			err_out: err_f, prod_out: prod_out, err_free: true,
-			firstSet: first, followSet: follow}
+			firstSet: first, followSet: follow,
+		}
 		parser.readToken()
 		parser.readToken()
 
@@ -52,8 +52,10 @@ func New(l *lexer.Lexer, verbose bool, err string, prod string) *Parser {
 
 	} else {
 
-		parser := &Parser{l: l, verbose: verbose, err_free: true,
-			firstSet: first, followSet: follow}
+		parser := &Parser{
+			l: l, verbose: verbose, err_free: true,
+			firstSet: first, followSet: follow,
+		}
 
 		parser.readToken()
 		parser.readToken()
@@ -77,7 +79,6 @@ func (p *Parser) Parse() (*ast.Node, *records.SymbolTable) {
 // begins the parsing using:  <Prog> ::= <ClassDecl> <FuncDef> 'main' <FuncBody>
 // Returns an Abstract Syntax Tree.
 func (p *Parser) parseProgram() (*ast.Node, *records.SymbolTable) {
-
 	if !p.skipErrors(ast.PROGRAM) {
 		return nil, nil
 	}
@@ -123,7 +124,6 @@ func (p *Parser) parseProgram() (*ast.Node, *records.SymbolTable) {
 
 // Parses the main function.
 func (p *Parser) parseMain() *ast.Node {
-
 	if p.thisToken.Type == lexer.MAIN {
 		p.readToken()
 	} else {
@@ -146,7 +146,6 @@ func (p *Parser) parseMain() *ast.Node {
 // If parsing the Class declarations fail will still parse the functions
 // to atleast output misssing characters or lexical errors.
 func (p *Parser) parseFromFunc() {
-
 	for p.thisToken.Type != lexer.FUNCTION {
 
 		if p.thisToken.Type == lexer.EOF {
@@ -166,7 +165,6 @@ func (p *Parser) parseFromFunc() {
 // If parsing the Func declarations fail will still parse the main func.
 // to atleast output misssing characters or lexical errors.
 func (p *Parser) parseFromMain() {
-
 	for p.thisToken.Type != lexer.MAIN {
 
 		if p.thisToken.Type == lexer.EOF {
@@ -181,7 +179,6 @@ func (p *Parser) parseFromMain() {
 
 // Parses Tokens related to array size.
 func (p *Parser) parseArraySizeRept() *ast.Node {
-
 	if !p.skipErrors(ast.ARRAYSIZE) {
 		return nil
 	}
@@ -213,7 +210,6 @@ func (p *Parser) parseArraySizeRept() *ast.Node {
 
 // Parses Tokens related Integer Values.
 func (p *Parser) parseIntNum() *ast.Node {
-
 	if p.thisToken.Type == lexer.INT_VALUE {
 
 		p.printProductions("IntNum: " + p.thisToken.Lexeme)
@@ -235,7 +231,6 @@ func (p *Parser) parseIntNum() *ast.Node {
 
 // Parses Tokens related Float Values.
 func (p *Parser) parseFloatNum() *ast.Node {
-
 	if p.thisToken.Type == lexer.FLOAT_VALUE {
 
 		p.printProductions("FloatNum: " + p.thisToken.Lexeme)
@@ -256,7 +251,6 @@ func (p *Parser) parseFloatNum() *ast.Node {
 
 // Parses Tokens related to String Literals.
 func (p *Parser) parseStringLit() *ast.Node {
-
 	if p.thisToken.Type == lexer.STRINGLIT {
 
 		p.printProductions("StringLit: " + p.thisToken.Lexeme)
@@ -271,7 +265,6 @@ func (p *Parser) parseStringLit() *ast.Node {
 
 // Parses Tokens related to Visibility: Public, Private, Default
 func (p *Parser) parseVisibility() *ast.Node {
-
 	if !p.skipErrors(ast.VISIBILITY) {
 		return nil
 	}
@@ -298,7 +291,6 @@ func (p *Parser) parseVisibility() *ast.Node {
 
 // Parses Tokens related to Variables <Variable> ::= 'id' <VariableIdnest>
 func (p *Parser) parseVariable() *ast.Node {
-
 	if !p.skipErrors(ast.VARIABLE) {
 		return nil
 	}
@@ -318,23 +310,21 @@ func (p *Parser) parseVariable() *ast.Node {
 
 // Parses Tokens <VariableIdnest> ::= <IndiceRep> <VariableIdnestTail>
 func (p *Parser) parseVariableIdnest() *ast.Node {
-
 	if !p.skipErrors(ast.VARIABLEIDNEST) {
 		return nil
 	}
 
+	// TODO:
 	varIdNest := ast.New(ast.VARIABLEIDNEST, "")
 	varIdNest.AddChild(p.parseIndiceRep())
 	varIdNest.AddChild(p.parseVariableIdnestTail())
 
 	return varIdNest
-
 }
 
 // Parses token related to the array indice
 // <IndiceRep> ::= '[' <Expr> ']' <IndiceRep> | EPSILON.
 func (p *Parser) parseIndiceRep() *ast.Node {
-
 	if !p.skipErrors(ast.INDICEREP_PROD) {
 		return nil
 	}
@@ -372,7 +362,6 @@ func (p *Parser) parseIndiceRep() *ast.Node {
 
 // <VariableIdnestTail> ::= '.' 'id' <VariableIdnest> | EPSILON
 func (p *Parser) parseVariableIdnestTail() *ast.Node {
-
 	if !p.skipErrors(ast.VARIABLEIDNESTTAIL) {
 		return nil
 	}
@@ -399,7 +388,6 @@ func (p *Parser) parseVariableIdnestTail() *ast.Node {
 
 // Parses Tokens related to the assign operation =.
 func (p *Parser) parseAssignOp() *ast.Node {
-
 	if !p.skipErrors(ast.ASSIGN) {
 		return nil
 	}
@@ -420,7 +408,6 @@ func (p *Parser) parseAssignOp() *ast.Node {
 
 // Parses Tokens related to the assign operation =.
 func (p *Parser) parseSign() *ast.Node {
-
 	if !p.skipErrors(ast.SIGN) {
 		return nil
 	}
@@ -441,7 +428,6 @@ func (p *Parser) parseSign() *ast.Node {
 
 // Parses Tokens that represents identifiers.
 func (p *Parser) parseIdentifier() *ast.Node {
-
 	p.printProductions("IDENTIFIER: " + p.thisToken.Lexeme)
 	identifier := ast.New(ast.IDENTIFIER, p.thisToken.Lexeme)
 	identifier.Line = p.getLineNumber()
@@ -452,7 +438,6 @@ func (p *Parser) parseIdentifier() *ast.Node {
 
 // Parses Token related to Add Operations +, -.
 func (p *Parser) parseAddOp() *ast.Node {
-
 	if !p.skipErrors(ast.PLUS) {
 		return nil
 	}
@@ -476,7 +461,6 @@ func (p *Parser) parseAddOp() *ast.Node {
 
 // Parses tokens related to Relational operations ==, !=. <, >, <=, >=.
 func (p *Parser) parseRelOp() *ast.Node {
-
 	if !p.skipErrors(ast.LT) {
 		return nil
 	}
@@ -509,7 +493,6 @@ func (p *Parser) parseRelOp() *ast.Node {
 
 // Checks if the current token is a Sign
 func (p *Parser) tokenIsSign() bool {
-
 	switch p.thisToken.Type {
 	case lexer.PLUS:
 		return true
@@ -522,7 +505,6 @@ func (p *Parser) tokenIsSign() bool {
 
 // Checks if the current token is an Add operation.
 func (p *Parser) tokenIsAddOp() bool {
-
 	switch p.thisToken.Type {
 	case lexer.PLUS:
 		return true
@@ -536,7 +518,6 @@ func (p *Parser) tokenIsAddOp() bool {
 
 // Checks if the current token is a relational operation.
 func (p *Parser) tokenIsRelOp() bool {
-
 	switch p.thisToken.Type {
 	case lexer.EQUAL:
 		return true
@@ -556,7 +537,6 @@ func (p *Parser) tokenIsRelOp() bool {
 
 // Checks if the current token is a type: string, integer, float, Ident.
 func (p *Parser) tokenIsType() bool {
-
 	switch p.thisToken.Type {
 	case lexer.INTEGER:
 		return true
@@ -573,7 +553,6 @@ func (p *Parser) tokenIsType() bool {
 // Checks if the current token is in the First set of the
 // Expression Production rule.
 func (p *Parser) tokenIsExpression() bool {
-
 	switch p.thisToken.Type {
 	case lexer.INT_VALUE:
 		return true
@@ -595,13 +574,11 @@ func (p *Parser) tokenIsExpression() bool {
 		return true
 	}
 	return false
-
 }
 
 // Checks if the current token is in the First set of the
 // Statement Production rule.
 func (p *Parser) tokenIsStatement() bool {
-
 	switch p.thisToken.Type {
 	case lexer.IF:
 		return true
@@ -625,7 +602,6 @@ func (p *Parser) tokenIsStatement() bool {
 
 // Parses the tokens related to the Multiply operation: *, /, &.
 func (p *Parser) parseMultOp() *ast.Node {
-
 	if !p.skipErrors(ast.MUL) {
 		return nil
 	}
@@ -650,7 +626,6 @@ func (p *Parser) parseMultOp() *ast.Node {
 // Checks if the current token is in the first set of the Multiply
 // First set.
 func (p *Parser) tokenIsMultOp() bool {
-
 	switch p.thisToken.Type {
 	case lexer.MUL:
 		return true
@@ -664,7 +639,6 @@ func (p *Parser) tokenIsMultOp() bool {
 
 // Parses tokens related to the types: integer, string, float , Ident.
 func (p *Parser) parseType() *ast.Node {
-
 	if !p.skipErrors(ast.TYPE) {
 		return nil
 	}
@@ -704,7 +678,6 @@ func (p *Parser) getLineNumber() int {
 
 // Returns Message Of Missing Token
 func (p *Parser) printMissingMessage(tType lexer.TokenType) {
-
 	p.err_free = false
 
 	if p.verbose {
@@ -715,7 +688,6 @@ func (p *Parser) printMissingMessage(tType lexer.TokenType) {
 
 // Print Productions
 func (p *Parser) printProductions(mess string) {
-
 	if p.verbose {
 		reporting.OutputProd("" + mess + " ")
 	}
@@ -734,7 +706,6 @@ func (p *Parser) SetErrorOut(path *os.File) {
 
 // Reads Till Semi Colon, Used to recover from error
 func (p *Parser) readTillSymbol(symbol lexer.TokenType) {
-
 	for {
 
 		if p.thisToken.Type == symbol {
@@ -746,11 +717,8 @@ func (p *Parser) readTillSymbol(symbol lexer.TokenType) {
 
 // Skips Errors - Implementation of Don't Panic Technique
 func (p *Parser) skipErrors(prod ast.Production) bool {
-
 	if p.firstSet[prod][p.thisToken.Type] {
-
 		return true
-
 	} else if p.firstSet[prod][lexer.EMPTY] &&
 
 		p.followSet[prod][p.thisToken.Type] {

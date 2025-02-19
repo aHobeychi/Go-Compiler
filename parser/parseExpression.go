@@ -7,9 +7,9 @@ import (
 )
 
 // Func for production <Expr> ::= <ArithExpr> <ExprTail>
-//                     <ExprTail> ::= <RelOp> <ArithExpr> | EPSILON
+//
+//	<ExprTail> ::= <RelOp> <ArithExpr> | EPSILON
 func (p *Parser) parseExpression() *ast.Node {
-
 	if !p.skipErrors(ast.EXPR) {
 		return nil
 	}
@@ -45,7 +45,6 @@ func (p *Parser) parseExpression() *ast.Node {
 // Func for production <ArithExpr> ::= <Term> <ArithExprTail>
 // <ArithExprTail> ::= <AddOp> <Term> <ArithExprTail> | EPSILON
 func (p *Parser) parseArithExpr() *ast.Node {
-
 	var left *ast.Node
 
 	if !p.skipErrors(ast.ARITHEXPR) {
@@ -76,9 +75,9 @@ func (p *Parser) parseArithExpr() *ast.Node {
 }
 
 // Func for production <Term> ::= <Factor> <TermTail>
-//                     <TermTail> ::= <MultOp> <Factor> <TermTail> | EPSILON
+//
+//	<TermTail> ::= <MultOp> <Factor> <TermTail> | EPSILON
 func (p *Parser) parseTerm() *ast.Node {
-
 	var left *ast.Node
 
 	if !p.skipErrors(ast.TERM) {
@@ -109,16 +108,16 @@ func (p *Parser) parseTerm() *ast.Node {
 }
 
 // Func for the following productions
-//      <Factor> ::= <FuncOrVar>
-//      <Factor> ::= 'intnum'
-//      <Factor> ::= 'floatnum'
-//      <Factor> ::= 'stringlit'
-//      <Factor> ::= '(' <Expr> ')'
-//      <Factor> ::= 'not' <Factor>
-//      <Factor> ::= <Sign> <Factor>
-//      <Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']'
+//
+//	<Factor> ::= <FuncOrVar>
+//	<Factor> ::= 'intnum'
+//	<Factor> ::= 'floatnum'
+//	<Factor> ::= 'stringlit'
+//	<Factor> ::= '(' <Expr> ')'
+//	<Factor> ::= 'not' <Factor>
+//	<Factor> ::= <Sign> <Factor>
+//	<Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']'
 func (p *Parser) parseFactor() *ast.Node {
-
 	var factor *ast.Node
 	p.printProductions("FACTOR")
 
@@ -150,7 +149,6 @@ func (p *Parser) parseFactor() *ast.Node {
 
 // Parses factor containing an expression
 func (p *Parser) parseFactorExpr() *ast.Node {
-
 	if p.thisToken.Type == lexer.LPAREN {
 		p.readToken()
 	} else {
@@ -171,7 +169,6 @@ func (p *Parser) parseFactorExpr() *ast.Node {
 
 // Parses factor containing a Not expression
 func (p *Parser) parseFactorNot() *ast.Node {
-
 	var sign *ast.Node
 
 	if p.thisToken.Type == lexer.NOT {
@@ -188,7 +185,6 @@ func (p *Parser) parseFactorNot() *ast.Node {
 // Function to parse signed factor
 // <Factor> ::= <Sign> <Factor>
 func (p *Parser) parseSignFactor() *ast.Node {
-
 	var sign *ast.Node
 	if p.tokenIsSign() {
 		sign = p.parseSign()
@@ -203,7 +199,6 @@ func (p *Parser) parseSignFactor() *ast.Node {
 // Function to parse the ternary operator
 // <Factor> ::= 'qm' '[' <Expr> ':' <Expr> ':' <Expr> ']'
 func (p *Parser) parseTernary() *ast.Node {
-
 	ternary := ast.New(ast.TERNARY, "?")
 	ternary.Line = p.getLineNumber()
 

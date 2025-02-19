@@ -32,7 +32,6 @@ func newTokenizer(input string) *Tokenizer {
 
 // Read Next Char and track it in the lexer
 func (l *Tokenizer) readChar() {
-
 	if l.readPosition >= len(l.input) {
 		l.ch = 0
 	} else {
@@ -45,7 +44,6 @@ func (l *Tokenizer) readChar() {
 
 // Return the next token in the input
 func (l *Tokenizer) GetToken() Token {
-
 	var tok Token
 	tok.Error_Code = 1
 	next_input := byte(9)
@@ -214,7 +212,6 @@ func (l *Tokenizer) readRestOfLine() string {
 // Read Content of a block comment.
 // Accepts nested blocks
 func (l *Tokenizer) readBlock() string {
-
 	column := l.column
 	previous := byte('p')
 	var stack utilities.Stack
@@ -251,7 +248,6 @@ func (l *Tokenizer) readBlock() string {
 
 // Read Content of literal String.
 func (l *Tokenizer) readStringLiteral() string {
-
 	column := l.column
 
 	for {
@@ -289,7 +285,6 @@ func isAlphaNum(ch byte) bool {
 
 // Processes Numbers
 func (l *Tokenizer) processNumber() Token {
-
 	correct := false
 	isFloat := false
 	matchedSymbol := false

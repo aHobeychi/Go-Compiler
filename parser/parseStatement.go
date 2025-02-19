@@ -9,7 +9,6 @@ import (
 // Parses the Statement lists -- >
 // <StatementList> ::= <Statement> <StatementList> | EPSILON .
 func (p *Parser) parseStatementList() *ast.Node {
-
 	if !p.skipErrors(ast.STATEMENTLIST) {
 		return nil
 	}
@@ -17,12 +16,8 @@ func (p *Parser) parseStatementList() *ast.Node {
 	p.printProductions("\n<STATEMENTLIST>")
 	statementList := ast.New(ast.STATEMENT, "")
 
-	for {
-		if !p.tokenIsStatement() {
-			break
-		}
+	for p.tokenIsStatement() {
 		statementList.AddChild(p.parseStatement())
-
 	}
 
 	if statementList.NumberOfChildren() == 0 {
@@ -37,7 +32,6 @@ func (p *Parser) parseStatementList() *ast.Node {
 // <StatBlock> ::= <Statement>
 // <StatBlock> ::= EPSILON
 func (p *Parser) parseStatBlock() *ast.Node {
-
 	if !p.skipErrors(ast.STATEMENTBLOCK) {
 		return nil
 	}
@@ -74,7 +68,6 @@ func (p *Parser) parseStatBlock() *ast.Node {
 // <Statement> ::= 'break' ';'
 // <Statement> ::= 'continue' ';'
 func (p *Parser) parseStatement() *ast.Node {
-
 	if !p.skipErrors(ast.STATEMENT) {
 		return nil
 	}
@@ -114,7 +107,6 @@ func (p *Parser) parseStatement() *ast.Node {
 
 // Parses the if statements.
 func (p *Parser) parseIfStatement() *ast.Node {
-
 	p.printProductions("<IF>")
 	ifStatement := ast.New(ast.IF, "")
 
@@ -169,7 +161,6 @@ func (p *Parser) parseIfStatement() *ast.Node {
 
 // Parses the while statements.
 func (p *Parser) parseWhileStatement() *ast.Node {
-
 	p.printProductions("<WHILE>")
 	whileStatement := ast.New(ast.WHILE, "while")
 
@@ -194,12 +185,10 @@ func (p *Parser) parseWhileStatement() *ast.Node {
 	whileStatement.AddChild(p.parseStatBlock())
 
 	return whileStatement
-
 }
 
 // Parses the Read statements.
 func (p *Parser) parseReadStatement() *ast.Node {
-
 	p.printProductions("<READ>")
 	readStatement := ast.New(ast.READ, "read")
 
@@ -226,7 +215,6 @@ func (p *Parser) parseReadStatement() *ast.Node {
 
 // Parses the Write Statement.
 func (p *Parser) parseWriteStatement() *ast.Node {
-
 	p.printProductions("<WRITE>")
 	writeStatement := ast.New(ast.WRITE, "write")
 
@@ -253,7 +241,6 @@ func (p *Parser) parseWriteStatement() *ast.Node {
 
 // Parses the Return Statement.
 func (p *Parser) parseReturnStatement() *ast.Node {
-
 	returnStatement := ast.New(ast.RETURN, "")
 	p.printProductions("<RETURN>")
 
@@ -280,7 +267,6 @@ func (p *Parser) parseReturnStatement() *ast.Node {
 
 // Parses the Break Statement.
 func (p *Parser) parseBreakStatement() *ast.Node {
-
 	p.printProductions("<BREAk>")
 
 	p.readToken()
@@ -293,7 +279,6 @@ func (p *Parser) parseBreakStatement() *ast.Node {
 
 // Parses the Continue Statement.
 func (p *Parser) parseContinueStatement() *ast.Node {
-
 	p.readToken()
 	continue_node := ast.New(ast.CONTINUE, "continue")
 	continue_node.Line = p.getLineNumber()
@@ -303,7 +288,6 @@ func (p *Parser) parseContinueStatement() *ast.Node {
 
 // Parses the <AParams> ::= <Expr> <AParamsTail> | EPSILON Production.
 func (p *Parser) parseAParams() *ast.Node {
-
 	if !p.skipErrors(ast.APARAMS) {
 		return nil
 	}
@@ -315,11 +299,7 @@ func (p *Parser) parseAParams() *ast.Node {
 		return aParams
 	}
 
-	for {
-
-		if !p.tokenIsExpression() {
-			break
-		}
+	for p.tokenIsExpression() {
 
 		aParams.AddChild(p.parseExpression())
 

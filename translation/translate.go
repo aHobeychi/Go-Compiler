@@ -11,7 +11,7 @@ import (
 var gb_table *records.SymbolTable
 var tree_root *ast.Node
 var memory *memory_stack
-var registerPool *utilities.Stack
+var registerPool *utilities.Stack[string]
 var topOffset string
 var has_output bool
 

@@ -5,9 +5,9 @@ import (
 )
 
 // Returns New registor pool.
-func getNewRegisterPool() *utilities.Stack {
+func getNewRegisterPool() *utilities.Stack[string] {
 
-	var reg utilities.Stack
+	var reg utilities.Stack[string]
 
 	reg.Push("r12")
 	reg.Push("r11")

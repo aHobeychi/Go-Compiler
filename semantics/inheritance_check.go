@@ -72,7 +72,7 @@ func checkForCircularInherits(gb_table *records.SymbolTable) bool {
 			}
 		}
 
-		var stack utilities.Stack
+		var stack utilities.Stack[string]
 		inherits := make(map[string]bool)
 
 		stack.Push(k)

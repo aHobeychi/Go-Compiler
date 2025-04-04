@@ -1,22 +1,25 @@
 // Package containing useful functions and data structures.
 package utilities
 
-type Stack []string
+// Stack is a generic implementation of a stack data structure
+// The type parameter T must be comparable to enable the Contains method
+type Stack[T comparable] []T
 
-// Checks if the Stacks is empty.
-func (s *Stack) IsEmpty() bool {
+// IsEmpty checks if the Stack is empty.
+func (s *Stack[T]) IsEmpty() bool {
 	return len(*s) == 0
 }
 
-// Pushes string on top of the stack.
-func (s *Stack) Push(str string) {
-	*s = append(*s, str)
+// Push adds an item on top of the stack.
+func (s *Stack[T]) Push(item T) {
+	*s = append(*s, item)
 }
 
-// Pops string from the stake.
-func (s *Stack) Pop() (bool, string) {
+// Pop removes and returns the top item from the stack.
+func (s *Stack[T]) Pop() (bool, T) {
+	var zero T
 	if s.IsEmpty() {
-		return false, ""
+		return false, zero
 	} else {
 		index := len(*s) - 1
 		element := (*s)[index]
@@ -25,10 +28,10 @@ func (s *Stack) Pop() (bool, string) {
 	}
 }
 
-// Returns true if stack contains specific string.
-func (s *Stack) Contains(el string) bool {
-	for _, str := range *s {
-		if str == el {
+// Contains returns true if stack contains specific item.
+func (s *Stack[T]) Contains(item T) bool {
+	for _, val := range *s {
+		if val == item {
 			return true
 		}
 	}

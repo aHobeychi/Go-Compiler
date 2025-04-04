@@ -3,6 +3,7 @@ package records
 import (
 	"aHobeychi/GoCompiler/ast"
 	"strconv"
+	"strings"
 )
 
 // Variable row, used to define variables, their types and values
@@ -19,18 +20,26 @@ type VariableRow struct {
 
 // Returns string value of
 func (vr *VariableRow) ToString() string {
+	var sb strings.Builder
 
-	str_rep := vr.Name + "｜" + ast.TypesStrings[vr.Kind] + "｜Visibility: " + ast.TypesStrings[vr.Visibility]
-	str_rep = str_rep + "｜Type: " + vr.VarType
+	sb.WriteString(vr.Name)
+	sb.WriteString("｜")
+	sb.WriteString(ast.TypesStrings[vr.Kind])
+	sb.WriteString("｜Visibility: ")
+	sb.WriteString(ast.TypesStrings[vr.Visibility])
+	sb.WriteString("｜Type: ")
+	sb.WriteString(vr.VarType)
 
 	for i := 0; i < vr.ArrDim; i++ {
-		str_rep = str_rep + "[" + "]"
+		sb.WriteString("[]")
 	}
 
-	str_rep += "｜Size: " + strconv.Itoa(vr.Memory_Size)
-	str_rep += "｜Offset: " + strconv.Itoa(vr.Memory_Address)
+	sb.WriteString("｜Size: ")
+	sb.WriteString(strconv.Itoa(vr.Memory_Size))
+	sb.WriteString("｜Offset: ")
+	sb.WriteString(strconv.Itoa(vr.Memory_Address))
 
-	return str_rep
+	return sb.String()
 }
 
 // return row kind.

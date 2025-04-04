@@ -214,7 +214,7 @@ func (l *Tokenizer) readRestOfLine() string {
 func (l *Tokenizer) readBlock() string {
 	column := l.column
 	previous := byte('p')
-	var stack utilities.Stack
+	var stack utilities.Stack[string]
 
 	for {
 
